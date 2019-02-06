@@ -46,7 +46,7 @@ class Agent(base_agent.BaseAgent):
 		# If this is the end of the epoch or this is the last observation
 		if self.nb_steps == self.max_steps or obs_new.last():
 			# If this is the last observation, we bootstrap the value function
-			self.rl.finish_path(obs_new.reward)
+			self.rl.finish_path(reward)
 
 			# We do not train yet if this is just the end of thvvve current episode
 			if obs_new.last() is True and self.nb_steps != self.max_steps:
@@ -88,7 +88,6 @@ class Agent(base_agent.BaseAgent):
 	def get_feature_screen(self, obs, screen_feature):
 		# Get the feature associated with the observation
 		mapp = obs.observation["feature_screen"][screen_feature.index]
-		mapp = np.expand_dims(mapp,axis=0)
 		return np.array(mapp)
 
 	def prediction_to_position(self,pi, dim = 64):
