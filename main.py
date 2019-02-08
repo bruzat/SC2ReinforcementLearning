@@ -12,9 +12,10 @@ from pysc2.lib import actions, features
 
 def main(_):
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--model', type=str, help='Name of the model')
+	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of the model')
+	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
-	parser.add_argument('--training', type=bool, help="if it is training")
+	parser.add_argument('--training', type=bool, nargs='?', const=True, default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	args, unknown_flags = parser.parse_known_args()
 
@@ -22,11 +23,12 @@ def main(_):
 	visualize = args.visualize
 	replay = args.replay
 	is_training = args.training
+	load_model = args.load_model
 
 	step_mul = 16 if model is None else 16
 	save_replay_episodes = 10 if replay else 0
 
-	ag = agent.Agent(model=model, rl = policyGradient.PolicyGradient)
+	ag = agent.Agent(model=model, rl = policyGradient.PolicyGradient, load_model=load_model)
 
 	try:
 		with sc2_env.SC2Env(map_name="MoveToBeacon", players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
@@ -59,11 +61,11 @@ def main(_):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--model', type=str, help='Name of the model')
+	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of the model')
+	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
-	parser.add_argument('--training', type=bool, help="if it is training")
+	parser.add_argument('--training', type=bool, nargs='?', const=True, default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
-
 	app.run(main, argv=sys.argv[:1] + unknown_flags)

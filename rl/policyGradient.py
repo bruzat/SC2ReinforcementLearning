@@ -2,21 +2,13 @@ import numpy as np
 from scipy import signal
 from tensorflow.keras import backend as K
 from tensorflow.keras import layers
-from tensorflow.keras.models import Model
+from tensorflow.keras.models import Model, load_model
 from tensorflow.keras import optimizers
 from tensorflow.keras import utils as np_utils
 from tensorflow.keras.layers import Activation, Lambda
 
 from absl import app
-
-def log_softmax(x):
-    return x - K.log(K.sum(K.exp(x)))
-
-def softmax(x):
-    """Compute softmax values for each sets of scores in x."""
-    return np.exp(x) / np.sum(np.exp(x))
-
-np_utils.get_custom_objects().update({'log_softmax': Activation(log_softmax)})
+import os
 
 class Buffer:
     """
@@ -99,19 +91,35 @@ class PolicyGradient(object):
         self.__build_network(self.input_dim, self.output_dim)
         self.__build_train_fn()
 
+    def print_train_result(self, epoch, result):
+        print("__________________________")
+        print("| loss 		"+str(result[0]))
+        print("| entropy	"+str(result[1]))
+        print("| reward	"+str(result[2]))
+        print("| epoch		"+str(epoch))
+        print("__________________________")
+
+    def log_train_result(self, path, model, epoch, result):
+        writepath = './'+path+'/'+model+'/log.txt'
+        os.makedirs(os.path.dirname(writepath), exist_ok=True)
+        mode = 'a' if os.path.exists(writepath) else 'w'
+        with open(writepath,mode) as file:
+            file.write(str(epoch)+','+str(result[0])+','+str(result[1])+','+str(result[2])+'\n')
+
+    def save(self,path,model, it):
+        writepath='./'+path+'/'+model+'/'+model+str(it)+'.h5'
+        os.makedirs(os.path.dirname(writepath), exist_ok=True)
+        self.model.save(writepath)
+
+    def load(self,path, model):
+        saves = [int(x[len(model):-3]) for x in os.listdir('./'+path+'/'+model) if model in x and len(x) > len(model)]
+        it = '%d' % max(saves)
+        self.model = load_model('./'+path+'/'+str(model)+'/'+str(model)+str(it)+'.h5')
+        self.__build_train_fn()
+        return int(it)
+
     def store(self, obs, act, rew):
         self.buffer.store(obs, act, rew)
-
-    def save(self, it):
-        self.model.save('./logger/model_'+str(it)+'.h5')
-
-
-    def load(self, model):
-        saves = [int(x[11:]) for x in os.listdir("./logger") if model in x and len(x) > 11]
-        it = '%d' % max(saves)
-        self.model = Model.load_model('./logger/'+str(model)+'_'+str(it)+'.h5')
-        self.__build_train_fn()
-        return it
 
     def finish_path(self,last_val):
         self.buffer.finish_path(last_val)
@@ -119,7 +127,6 @@ class PolicyGradient(object):
     def get_action(self, state):
         action_prob = np.squeeze(self.model.predict([state]))
         return np.random.choice(np.arange(self.output_dim), p=action_prob)
-
 
     def train(self):
         obs, act, rew, adv = self.buffer.get()
