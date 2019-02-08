@@ -77,7 +77,7 @@ class Buffer:
         assert self.ptr == self.max_size # buffer has to be full before you can get
         self.ptr, self.path_start_idx = 0, 0
         # the next two lines implement the advantage normalization trick
-        # Normalize the Advantage
+        # Normalize the Advantagee
         self.adv_buf = (self.adv_buf - np.mean(self.adv_buf)) / np.std(self.adv_buf)
         return self.obs_buf, self.act_buf, self.rew_buf, self.adv_buf
 
@@ -117,14 +117,15 @@ class PolicyGradient(object):
         self.buffer.finish_path(last_val)
 
     def get_action(self, state):
-        action_prob = np.squeeze(softmax(self.model.predict([state])))
+        action_prob = np.squeeze(self.model.predict([state]))
         return np.random.choice(np.arange(self.output_dim), p=action_prob)
+
 
     def train(self):
         obs, act, rew, adv = self.buffer.get()
         loss = []
         entropy = []
-        for step in range(5):
+        for step in range(20):
             result = self.train_fn([obs, act, adv])
             loss.append(result[0])
             entropy.append(result[1])
@@ -142,6 +143,7 @@ class PolicyGradient(object):
         net = layers.Activation("relu")(net)
 
         net = layers.Dense(output_dim)(net)
+        net = layers.Activation("softmax")(net)
 
         self.model = Model(inputs=self.X, outputs=net)
 
@@ -162,7 +164,7 @@ class PolicyGradient(object):
         reward_placeholder = K.placeholder(shape=(None,),
                                                     name="reward")
 
-        action_prob_logsoftmax = log_softmax(action_prob_placeholder)
+        action_prob_logsoftmax = K.log(action_prob_placeholder)
 
         action_prob = K.sum(K.one_hot(action_placeholder,self.output_dim)
                                     * action_prob_logsoftmax , axis=1)
