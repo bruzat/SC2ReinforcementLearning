@@ -125,7 +125,7 @@ class PolicyGradient(object):
         obs, act, rew, adv = self.buffer.get()
         loss = []
         entropy = []
-        for step in range(20):
+        for step in range(5):
             result = self.train_fn([obs, act, adv])
             loss.append(result[0])
             entropy.append(result[1])
