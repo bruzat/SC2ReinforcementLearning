@@ -7,9 +7,9 @@ class Agent(base_agent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self,  path='logger', model='model', load_model=False, rl=None):
+	def __init__(self,  path='logger', model_name='model', model=None, load_model=False, rl=None):
 		super(Agent, self).__init__()
-		self.model = model
+		self.model_name = model_name
 		self.nb_steps = 0
 		self.max_steps = 512
 		self.epoch = 0
@@ -17,6 +17,7 @@ class Agent(base_agent.BaseAgent):
 
         # Create the NET class
 		self.rl = rl(
+			model = model,
         	input_dim=(64,64),
         	output_dim=64*64,
         	pi_lr=0.0001,
@@ -28,7 +29,7 @@ class Agent(base_agent.BaseAgent):
 		# Load the model
 		if load_model:
             #Load the existing model
-			self.epoch = self.rl.load(self.path,self.model)
+			self.epoch = self.rl.load(self.path,self.model_name)
 
 
 	def train(self, obs_new, obs, action, reward):
@@ -54,14 +55,14 @@ class Agent(base_agent.BaseAgent):
 
 			result = self.rl.train()
 			self.rl.print_train_result(self.epoch, result)
-			self.rl.log_train_result(self.path,self.model,self.epoch, result)
+			self.rl.log_train_result(self.path,self.model_name,self.epoch, result)
 
 
 			self.nb_steps = 0
 			self.epoch += 1
 			# Save every 100 epochs
 			if (self.epoch-1) % 300 == 0:
-				self.rl.save(self.path,self.model,self.epoch)
+				self.rl.save(self.path,self.model_name,self.epoch)
 
 	def step(self, obs):
 		# step function gets called automatically by pysc2 environment

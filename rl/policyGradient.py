@@ -1,11 +1,9 @@
 import numpy as np
 from scipy import signal
 from tensorflow.keras import backend as K
-from tensorflow.keras import layers
-from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.models import load_model
 from tensorflow.keras import optimizers
 from tensorflow.keras import utils as np_utils
-from tensorflow.keras.layers import Activation, Lambda
 
 from absl import app
 import os
@@ -78,7 +76,7 @@ class PolicyGradient(object):
         Implementation of Proximal Policy Optimization
         This Implementation handle only continous values
     """
-    def __init__(self, input_dim, output_dim, pi_lr, gamma, buffer_size):
+    def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size):
         super(PolicyGradient, self).__init__()
         # Stored the spaces
         self.input_dim = input_dim
@@ -88,8 +86,11 @@ class PolicyGradient(object):
         # Learning rate of the policy network
         self.pi_lr = pi_lr
 
-        self.__build_network(self.input_dim, self.output_dim)
+        self.model = model.build_network(self.input_dim, self.output_dim)
         self.__build_train_fn()
+
+        self.it_log = 0
+        self.log = ''
 
     def print_train_result(self, epoch, result):
         print("__________________________")
@@ -99,12 +100,18 @@ class PolicyGradient(object):
         print("| epoch		"+str(epoch))
         print("__________________________")
 
-    def log_train_result(self, path, model, epoch, result):
-        writepath = './'+path+'/'+model+'/log.txt'
-        os.makedirs(os.path.dirname(writepath), exist_ok=True)
-        mode = 'a' if os.path.exists(writepath) else 'w'
-        with open(writepath,mode) as file:
-            file.write(str(epoch)+','+str(result[0])+','+str(result[1])+','+str(result[2])+'\n')
+    def log_train_result(self, path, model, epoch, result, force = False):
+        self.log = self.log + str(epoch)+','+str(result[0])+','+str(result[1])+','+str(result[2])+'\n'
+        self.it_log += 1
+
+        if self.it_log >= 20 or force == True:
+            writepath = './'+path+'/'+model+'/log.txt'
+            os.makedirs(os.path.dirname(writepath), exist_ok=True)
+            mode = 'a' if os.path.exists(writepath) else 'w'
+            with open(writepath,mode) as file:
+                file.write(self.log)
+            self.log = ''
+            self.it_log = 0
 
     def save(self,path,model, it):
         writepath='./'+path+'/'+model+'/'+model+str(it)+'.h5'
@@ -132,27 +139,12 @@ class PolicyGradient(object):
         obs, act, rew, adv = self.buffer.get()
         loss = []
         entropy = []
-        for step in range(5):
+        for step in range(3):
             result = self.train_fn([obs, act, adv])
             loss.append(result[0])
             entropy.append(result[1])
 
         return [np.mean(loss),np.mean(entropy),np.mean(rew)]
-
-    def __build_network(self, input_dim, output_dim):
-        """Create a base network"""
-        self.X = layers.Input(shape=input_dim)
-        net = self.X
-
-        net = layers.Flatten()(net)
-
-        net = layers.Dense(256)(net)
-        net = layers.Activation("relu")(net)
-
-        net = layers.Dense(output_dim)(net)
-        net = layers.Activation("softmax")(net)
-
-        self.model = Model(inputs=self.X, outputs=net)
 
     def __build_train_fn(self):
         """Create a train function
