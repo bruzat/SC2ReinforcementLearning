@@ -36,14 +36,13 @@ def main(_):
 		model = dict_model['simpleDense']
 
 	print("model is : " + str(model))
-
-	step_mul = 16 if model_name is None else 16
+	step_mul = 6 if model_name is None else 6
 	save_replay_episodes = 10 if replay else 0
 
-	ag = agent.Agent(path='./logger/MoveToBeacon', model_name=model_name, model = model , rl = policyGradient.PolicyGradient, load_model=load_model)
+	ag = agent.Agent(path='./logger/CollectMineralShards', model_name=model_name, model = model , rl = policyGradient.PolicyGradient, load_model=load_model)
 
 	try:
-		with sc2_env.SC2Env(map_name="MoveToBeacon", players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
+		with sc2_env.SC2Env(map_name="CollectMineralShards", players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
 			feature_dimensions=features.Dimensions(screen=64, minimap=64),
 			use_feature_units=True),
 			step_mul=step_mul, # Number of step before to ask the next action to from the agent

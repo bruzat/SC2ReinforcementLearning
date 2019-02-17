@@ -2,13 +2,16 @@ from pysc2.agents import base_agent
 from pysc2.lib import actions, features
 import numpy as np
 
+import logger
+
 class Agent(base_agent.BaseAgent):
 	"""
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self,  path='logger', model_name='model', model=None, load_model=False, rl=None):
+	def __init__(self,  path='logger/', model_name='model', model=None, load_model=False, rl=None):
 		super(Agent, self).__init__()
+		self.logger = logger.Logger()
 		self.model_name = model_name
 		self.nb_steps = 0
 		self.max_steps = 512
@@ -54,8 +57,8 @@ class Agent(base_agent.BaseAgent):
 				return
 
 			result = self.rl.train()
-			self.rl.print_train_result(self.epoch, result)
-			self.rl.log_train_result(self.path,self.model_name,self.epoch, result)
+			self.logger.print_train_result(self.epoch, result)
+			self.logger.log_train_result(self.path,self.model_name,self.epoch, result)
 
 
 			self.nb_steps = 0
