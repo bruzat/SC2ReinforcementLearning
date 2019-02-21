@@ -1,7 +1,7 @@
+import os
 
-
-class logger(object):
-    def __init__(log_it=20):
+class Logger(object):
+    def __init__(self, log_it=20):
         self.it_log = 0
         self.log = ''
         self.log_it = log_it

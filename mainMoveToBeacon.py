@@ -35,6 +35,7 @@ def main(_):
 	else:
 		model = dict_model['simpleDense']
 
+	model = model()
 	print("model is : " + str(model))
 
 	step_mul = 16 if model_name is None else 16

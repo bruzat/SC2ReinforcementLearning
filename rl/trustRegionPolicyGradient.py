@@ -88,6 +88,7 @@ class PolicyGradient(object):
 
         self.model = model
         self.model.compile(self.input_dim, self.output_dim)
+        self.old_model = model.duplicate_model()
         self.__build_train_fn()
 
     def save(self,path,model, it):

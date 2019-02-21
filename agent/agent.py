@@ -2,7 +2,7 @@ from pysc2.agents import base_agent
 from pysc2.lib import actions, features
 import numpy as np
 
-import logger
+import agent.log as log
 
 class Agent(base_agent.BaseAgent):
 	"""
@@ -11,7 +11,7 @@ class Agent(base_agent.BaseAgent):
 
 	def __init__(self,  path='logger/', model_name='model', model=None, load_model=False, rl=None):
 		super(Agent, self).__init__()
-		self.logger = logger.Logger()
+		self.logger = log.Logger()
 		self.model_name = model_name
 		self.nb_steps = 0
 		self.max_steps = 512
