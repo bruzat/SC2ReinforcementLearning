@@ -12,9 +12,10 @@ def expand_dims(x):
 class SimpleConv(simpleModel.SimpleModel):
 
     def __init__(self):
-        simpleModel.SimpleModel.__init__(self)
+        super().__init__()
 
     def compile(self,input_dim, output_dim):
+        super().compile(input_dim, output_dim)
         """Create a base network"""
         X = layers.Input(shape=input_dim)
         net = X
