@@ -96,5 +96,5 @@ class SimpleMethod(object):
         self.buffer.finish_path(last_val)
 
     def get_action(self, state):
-        action_prob = np.squeeze(self.model.predict([state]))
+        action_prob = np.squeeze(self.model.predict([state])[0])
         return np.random.choice(np.arange(self.output_dim), p=action_prob)

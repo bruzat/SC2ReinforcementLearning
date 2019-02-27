@@ -19,7 +19,7 @@ dict_method = { 'pg': policyGradient.PolicyGradient,
 
 def main(_):
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--model_name', type=str, nargs='?', const='model', default='model', help='Name of model')
+	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
 	parser.add_argument('--method', type=str, nargs='?', const='method', default='methode', help='Name of method')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
@@ -27,7 +27,7 @@ def main(_):
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	args, unknown_flags = parser.parse_known_args()
 
-	model_name = args.model_name
+	model_name = args.model
 	method_name = args.method
 	visualize = args.visualize
 	replay = args.replay
@@ -85,7 +85,7 @@ def main(_):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--model_name', type=str, nargs='?', const='model', default='model', help='Name of model')
+	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
 	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")

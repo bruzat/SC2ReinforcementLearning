@@ -20,7 +20,7 @@ class SimpleDense(simpleModel.SimpleModel):
         net = layers.Activation("relu")(net)
 
         net = layers.Dense(output_dim)(net)
-        net = layers.Activation("softmax")(net)
+        softmax = layers.Activation("softmax")(net)
 
-        self.model= Model(inputs=X, outputs=net)
+        self.model= Model(inputs=X, outputs=[softmax,net])
         self.self_value()

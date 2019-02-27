@@ -24,8 +24,8 @@ class Agent(base_agent.BaseAgent):
 			model = model,
         	input_dim=(64,64),
         	output_dim=64*64,
-        	pi_lr=0.0001,
-        	gamma=0.99,
+        	pi_lr=0.1,
+        	gamma=0.98,
         	buffer_size=512,
 		)
 
@@ -37,7 +37,7 @@ class Agent(base_agent.BaseAgent):
 
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
-		reward = -1 if reward == 0 else 1
+		reward = 0 if reward == 0 else 1
 		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
 		# Store the reward
 		action_r = action[0]*64 + action[1]
@@ -50,7 +50,7 @@ class Agent(base_agent.BaseAgent):
 		# If this is the end of the epoch or this is the last observation
 		if self.nb_steps == self.max_steps or obs_new.last():
 			# If this is the last observation, we bootstrap the value function
-			self.method.finish_path(reward)
+			self.method.finish_path(-1)
 
 			# We do not train yet if this is just the end of thvvve current episode
 			if obs_new.last() is True and self.nb_steps != self.max_steps:
