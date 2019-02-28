@@ -70,7 +70,7 @@ def main(_):
     buffer_size = 1000
 
     # Create the NET class
-    agent = trustRegionPolicyOptomisation.TrustRegionPolicyOptomisation(
+    agent = policyGradient.PolicyGradient(
     	input_dim=(7, 7),
     	output_dim=4,
     	pi_lr=0.001,

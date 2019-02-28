@@ -32,5 +32,5 @@ class SimpleConv(simpleModel.SimpleModel):
         net = layers.Dense(output_dim)(net)
         softmax = layers.Activation("softmax")(net)
 
-        self.model= Model(inputs=X, outputs=[softmax,net])
+        self.model= Model(inputs=[X], outputs=[softmax])
         self.self_value()

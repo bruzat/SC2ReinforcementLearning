@@ -32,14 +32,14 @@ class TrustRegionPolicyOptomisation(simpleMethod.SimpleMethod):
         return [np.mean(loss),np.mean(entropy),np.mean(rew)]
 
     def get_actions_values(self, states):
-        return np.squeeze(self.model.predict(states)[0])
+        return np.squeeze(self.model.predict(states))
 
     def __build_train_fn(self):
         """Create a train function
         It replaces `model.fit(X, y)` because we use the output of model and use it for training.
 
         """
-        action_prob_placeholder = self.model.output[0]
+        action_prob_placeholder = self.model.output
         old_mu_placeholder = K.placeholder(shape=(None,),
                                                   name="old_mu_placeholder")
         action_placeholder = K.placeholder(shape=(None,),
