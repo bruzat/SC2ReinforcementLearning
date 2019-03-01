@@ -24,7 +24,7 @@ class Agent(base_agent.BaseAgent):
 			model = model,
         	input_dim=(64,64),
         	output_dim=64*64,
-        	pi_lr=0.1,
+        	pi_lr=0.001,
         	gamma=0.98,
         	buffer_size=512,
 		)

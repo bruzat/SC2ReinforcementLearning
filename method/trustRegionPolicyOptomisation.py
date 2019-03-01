@@ -45,8 +45,8 @@ class TrustRegionPolicyOptomisation(simpleMethod.SimpleMethod):
         action_placeholder = K.placeholder(shape=(None,),
                                                   name="action_placeholder",
                                                   dtype='int32')
-        reward_placeholder = K.placeholder(shape=(None,),
-                                                    name="reward")
+        advantage_placeholder = K.placeholder(shape=(None,),
+                                                    name="advantage")
 
 
         action_prob = K.sum(K.one_hot(action_placeholder,self.output_dim)
@@ -60,7 +60,7 @@ class TrustRegionPolicyOptomisation(simpleMethod.SimpleMethod):
         kl  = losses.kullback_leibler_divergence(old_mu_placeholder,action_prob_placeholder)
 
 
-        loss = (action_prob-action_prob_old) * reward_placeholder - kl
+        loss = (action_prob-action_prob_old) * advantage_placeholder - kl
         loss = -K.mean(loss)
 
         entropy = K.mean(-K.log(action_prob_old))
@@ -72,5 +72,5 @@ class TrustRegionPolicyOptomisation(simpleMethod.SimpleMethod):
         self.train_fn = K.function(inputs=[self.model.input,
                                            old_mu_placeholder,
                                            action_placeholder,
-                                           reward_placeholder],
+                                           advantage_placeholder],
                                    outputs=[loss,entropy],updates=updates)

@@ -1,4 +1,4 @@
-
+from tensorflow.keras import Model
 
 import os
 
@@ -20,7 +20,7 @@ class SimpleModel(object):
         self.model.save(writepath)
 
     def load(self,writepath):
-        self.model = load_model(writepath)
+        self.model = Model.load_model(writepath)
         self.self_value()
 
     def predict(self,input):

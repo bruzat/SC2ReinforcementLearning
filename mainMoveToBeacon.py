@@ -1,6 +1,6 @@
 from tensorflow import keras as k
 from agent import agent
-from method import policyGradient, trustRegionPolicyOptomisation
+from method import policyGradient, trustRegionPolicyOptomisation, proximalPolicyOptimisation
 from model import simpleDense, multiDense, simpleConv
 
 import argparse
@@ -15,7 +15,8 @@ dict_model = 	{'simpleDense':simpleDense.SimpleDense,
 				'multiDense':multiDense.MultiDense,
 				'simpleConv':simpleConv.SimpleConv}
 dict_method = { 'pg': policyGradient.PolicyGradient,
-				 'trpo': trustRegionPolicyOptomisation.TrustRegionPolicyOptomisation}
+				 'trpo': trustRegionPolicyOptomisation.TrustRegionPolicyOptomisation,
+				 'ppo': proximalPolicyOptimisation.ProximalPolicyOptimisation}
 
 def main(_):
 	parser = argparse.ArgumentParser()

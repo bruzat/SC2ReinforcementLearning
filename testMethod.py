@@ -1,4 +1,4 @@
-from method import trustRegionPolicyOptomisation, policyGradient
+from method import trustRegionPolicyOptomisation, policyGradient, proximalPolicyOptimisation
 from model import simpleDense
 from absl import app
 
@@ -70,7 +70,7 @@ def main(_):
     buffer_size = 1000
 
     # Create the NET class
-    agent = policyGradient.PolicyGradient(
+    agent = proximalPolicyOptimisation.ProximalPolicyOptimisation(
     	input_dim=(7, 7),
     	output_dim=4,
     	pi_lr=0.001,
