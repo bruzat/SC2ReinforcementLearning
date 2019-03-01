@@ -1,4 +1,5 @@
 .ipynb_checkpoints
 *.pyc
 logger
+!logger/printlog.py
 __pycache__
