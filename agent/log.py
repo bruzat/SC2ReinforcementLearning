@@ -20,7 +20,7 @@ class Logger(object):
         self.it_log += 1
 
         if self.it_log >= self.log_it or force == True:
-            writepath = './'+path+'/'+method+'/'+model+'/log.txt'
+            writepath = path+'/'+method+'/'+model+'/log.txt'
             os.makedirs(os.path.dirname(writepath), exist_ok=True)
             mode = 'a' if os.path.exists(writepath) else 'w'
             with open(writepath,mode) as file:
