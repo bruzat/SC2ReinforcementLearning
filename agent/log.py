@@ -6,16 +6,17 @@ class Logger(object):
         self.log = ''
         self.log_it = log_it
 
-    def print_train_result(self, epoch, result):
+    def print_train_result(self, epoch, result, score):
         print("__________________________")
         print("| loss 		"+str(result[0]))
         print("| entropy	"+str(result[1]))
         print("| reward	"+str(result[2]))
+        print("| score         "+str(score))
         print("| epoch		"+str(epoch))
         print("__________________________")
 
-    def log_train_result(self, path, method, model, epoch, result, force = False):
-        self.log = self.log + str(epoch)+','+str(result[0])+','+str(result[1])+','+str(result[2])+'\n'
+    def log_train_result(self, path, method, model, epoch, score, result, force = False):
+        self.log = self.log +str(epoch)+','+str(result[0])+','+str(result[1])+','+str(result[2])+','+str(score)+'\n'
         self.it_log += 1
 
         if self.it_log >= self.log_it or force == True:

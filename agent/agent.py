@@ -18,6 +18,8 @@ class Agent(base_agent.BaseAgent):
 		self.max_steps = 512
 		self.epoch = 0
 		self.path = path
+		self.score = 0
+		self.score_reset = 0
 
         # Create the NET class
 		self.method = method(
@@ -38,6 +40,7 @@ class Agent(base_agent.BaseAgent):
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
 		reward = 0 if reward == 0 else 1
+		self.score += reward
 		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
 		# Store the reward
 		action_r = action[0]*64 + action[1]
@@ -53,14 +56,17 @@ class Agent(base_agent.BaseAgent):
 			self.method.finish_path(-1)
 
 			# We do not train yet if this is just the end of thvvve current episode
+			if obs_new.last():
+				self.score_reset += 1
 			if obs_new.last() is True and self.nb_steps != self.max_steps:
 				return
 
 			result = self.method.train()
-			self.logger.print_train_result(self.epoch, result)
-			self.logger.log_train_result(self.path, self.method_name, self.model_name, self.epoch, result)
+			self.logger.print_train_result(self.epoch, result, self.score//self.score_reset)
+			self.logger.log_train_result(self.path, self.method_name, self.model_name, self.epoch, self.score//self.score_reset, result)
 
-
+			self.score_reset = 0
+			self.score = 0
 			self.nb_steps = 0
 			self.epoch += 1
 			# Save every 100 epochs

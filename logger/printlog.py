@@ -23,34 +23,42 @@ def main(_):
 	number_mean = args.nb
 	print(number_mean)
 	log_train = pd.read_csv('./'+map+'/'+method+'/'+model+'/log.txt')
-	log_train.columns = ['Epoch', 'Loss', 'Entropy','MeanReward']
+	log_train.columns = ['Epoch', 'Loss', 'Entropy','Score','MeanReward']
 
 
 	Loss = []
 	Entropy = []
+	Score = []
 	MeanReward = []
 	for i in range(len(log_train)//number_mean):
 		l = np.mean(log_train['Loss'][i*number_mean:i*number_mean+number_mean])
 		en = np.mean(log_train['Entropy'][i*number_mean:i*number_mean+number_mean])
+		sc = np.mean(log_train['Score'][i*number_mean:i*number_mean+number_mean])
 		mr = np.mean(log_train['MeanReward'][i*number_mean:i*number_mean+number_mean])
 		for i in range(number_mean):
 			Loss.append(l)
 			Entropy.append(en)
+			Score.append(sc)
 			MeanReward.append(mr)
 
 
-	plt.subplot(3,1,1)
+	plt.subplot(2,2,1)
 	plt.plot(Loss)
-	plt.xlabel('Epoch')
+	plt.xlabel('Loss')
 	plt.legend(['Loss'], loc='upper left')
 
-	plt.subplot(3,1,2)
+	plt.subplot(2,2,2)
 	plt.plot(Entropy)
-	plt.xlabel('Epoch')
+	plt.xlabel('Entropy')
 	plt.legend(['Entropy'], loc='upper left')
 
-	plt.subplot(3,1,3)
+	plt.subplot(2,2,3)
 	plt.plot(MeanReward)
+	plt.xlabel('Score')
+	plt.legend(['Score'], loc='upper left')
+
+	plt.subplot(2,2,4)
+	plt.plot(Score)
 	plt.xlabel('Epoch')
 	plt.legend(['MeanReward'], loc='upper left')
 	plt.show()
