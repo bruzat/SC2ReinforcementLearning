@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import signal
 
+import os
+
 class Buffer:
     """
     A buffer for storing trajectories experienced by a PolicyGradient agent interacting
@@ -98,3 +100,6 @@ class SimpleMethod(object):
     def get_action(self, state):
         action_prob = np.squeeze(self.model.predict([state]))
         return np.random.choice(np.arange(self.output_dim), p=action_prob)
+
+    def __build_train_fn(self):
+        pass

@@ -33,7 +33,7 @@ class Agent(base_agent.BaseAgent):
 		# Load the model
 		if load_model:
             #Load the existing model
-			self.epoch = self.method.load(self.path, self.method, self.model_name)
+			self.epoch = self.method.load(self.path, self.method_name, self.model_name)
 
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
