@@ -25,7 +25,7 @@ class PolicyGradient(simpleMethod.SimpleMethod):
         loss = []
         entropy = []
         for step in range(5):
-            result = self.train_fn([obs, act, adv])
+            result = self.train_fn([*obs, act, adv])
             loss.append(result[0])
             entropy.append(result[1])
 

@@ -24,7 +24,7 @@ class Agent(base_agent.BaseAgent):
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=(64,64),
+        	input_dim=[(64,64)],
         	output_dim=64*64,
         	pi_lr=0.0001,
         	gamma=0.98,

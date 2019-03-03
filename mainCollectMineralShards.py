@@ -49,7 +49,7 @@ def main(_):
 
 	print("method is : " + str(method))
 
-	step_mul = 16 if model_name is None else 16
+	step_mul = 12 if model_name is None else 12
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent2.Agent(path='./logger/CollectMineralShards', model_name=model_name, model = model, load_model=load_model,

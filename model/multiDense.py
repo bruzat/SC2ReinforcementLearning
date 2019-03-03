@@ -11,10 +11,14 @@ class MultiDense(simpleModel.SimpleModel):
     def compile(self, input_dim, output_dim):
         super().compile(input_dim, output_dim)
         """Create a base network"""
-        X = layers.Input(shape=input_dim)
-        net = X
+        X_inputs = []
+        for input_dim in dict_input_dim:
+            X_inputs.append(layers.Input(shape=input_dim))
 
-        net = layers.Flatten()(net)
+        if len(dict_input_dim) > 1:
+            net = layers.Concatenate(axis=-1)(X_inputs)
+        else:
+            net = X_inputs[0]
 
         net = layers.Dense(256)(net)
         net = layers.Activation("relu")(net)
@@ -28,5 +32,5 @@ class MultiDense(simpleModel.SimpleModel):
         net = layers.Dense(output_dim)(net)
         softmax = layers.Activation("softmax")(net)
 
-        self.model= Model(inputs=[X], outputs=[softmax])
+        self.model= Model(inputs=X_inputs, outputs=[softmax])
         self.self_value()

@@ -24,7 +24,7 @@ class Agent(base_agent.BaseAgent):
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=(64,64),
+        	input_dim=[(64,64)],
         	output_dim=64*64,
         	pi_lr=0.0001,
         	gamma=0.98,
@@ -47,7 +47,9 @@ class Agent(base_agent.BaseAgent):
 		self.method.store(feat, action_r, reward)
 		# Increase the current step
 		self.nb_steps += 1
-
+		# Finish the episode on reward == 1
+		if reward == 1 and self.nb_steps != self.max_steps and not obs_new.last():
+			self.method.finish_path(reward)
 		# If this is the end of the epoch or this is the last observation
 		if self.nb_steps == self.max_steps or obs_new.last():
 			# If this is the last observation, we bootstrap the value function

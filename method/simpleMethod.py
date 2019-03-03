@@ -11,9 +11,22 @@ class Buffer:
     """
 
     def __init__(self, obs_dim, act_dim, size, gamma=0.99, lam=0.95):
-        self.obs_buf = np.zeros(Buffer.combined_shape(size, obs_dim), dtype=np.float32)
+        # Obs buffer
+        self.obs_dim = obs_dim
+        if type(self.obs_dim) is list or type(self.obs_dim) is tuple:
+            self.obs_buf = []
+            for dim in self.obs_dim:
+                self.obs_buf.append(np.zeros(Buffer.combined_shape(size, dim), dtype=np.float32))
+        else:
+            self.obs_buf = np.zeros(Buffer.combined_shape(size, self.obs_dim), dtype=np.float32)
         # Actions buffer
-        self.act_buf = np.zeros(size, dtype=np.float32)
+        self.act_dim = act_dim
+        if type(self.act_dim) is list or type(self.act_dim) is tuple:
+            self.act_buf = []
+            for dim in self.act_dim:
+                self.act_buf.append(np.zeros(size, dtype=np.float32))
+        else:
+            self.act_buf = np.zeros(size, dtype=np.float32)
         # Advantages buffer
         self.adv_buf = np.zeros(size, dtype=np.float32)
         # Rewards buffer
@@ -44,8 +57,18 @@ class Buffer:
             Append one timestep of agent-environment interaction to the buffer.
         """
         assert self.ptr < self.max_size
-        self.obs_buf[self.ptr] = obs
-        self.act_buf[self.ptr] = act
+        if type(self.obs_dim) is list or type(self.obs_dim) is tuple:
+            for i in range(len(self.obs_dim)):
+                self.obs_buf[i][self.ptr] = obs[i]
+        else:
+            self.obs_buf[self.ptr] = obs
+
+        if type(self.act_dim) is list or type(self.act_dim) is tuple:
+            for i in range(len(self.act_dim)):
+                self.act_buf[i][self.ptr] = act[i]
+        else:
+            self.act_buf[self.ptr] = act
+
         self.rew_buf[self.ptr] = rew
         self.ptr += 1
 
@@ -98,8 +121,11 @@ class SimpleMethod(object):
         self.buffer.finish_path(last_val)
 
     def get_action(self, state):
-        action_prob = np.squeeze(self.model.predict([state]))
+        action_prob = np.squeeze(self.model.predict([[x] for x in state]))
         return np.random.choice(np.arange(self.output_dim), p=action_prob)
 
+    def get_actions_values(self, states):
+        return np.squeeze(self.model.predict(states))
+        
     def __build_train_fn(self):
         pass

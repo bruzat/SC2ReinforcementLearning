@@ -25,14 +25,11 @@ class ProximalPolicyOptimisation(simpleMethod.SimpleMethod):
         entropy = []
         old_mu = self.get_actions_values(obs)
         for step in range(5):
-            result = self.train_fn([obs, old_mu, act, adv])
+            result = self.train_fn([ *obs, old_mu, act, adv])
             loss.append(result[0])
             entropy.append(result[1])
 
         return [np.mean(loss),np.mean(entropy),np.mean(rew)]
-
-    def get_actions_values(self, states):
-        return np.squeeze(self.model.predict(states))
 
     def __build_train_fn(self):
         """Create a train function
@@ -67,7 +64,7 @@ class ProximalPolicyOptimisation(simpleMethod.SimpleMethod):
         updates = adam.get_updates(params=self.model.trainable_weights,
                                    loss=loss)
 
-        self.train_fn = K.function(inputs=[self.model.input,
+        self.train_fn = K.function(inputs=[*self.model.input,
                                            old_mu_placeholder,
                                            action_placeholder,
                                            advantage_placeholder],
