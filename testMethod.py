@@ -1,5 +1,5 @@
-from method import trustRegionPolicyOptomisation, policyGradient, proximalPolicyOptimisation
-from model import simpleDense, simpleDenseConcat
+from method import trustRegionPolicyOptimization, policyGradient, proximalPolicyOptimization
+from model import simpleDense, simpleDenseMulti
 from absl import app
 
 import numpy as np
@@ -40,13 +40,13 @@ class GridWorld(object):
         reward = []
         done = []
         for i in range(self.dim):
-            if action == 0: # Top
+            if action[i] == 0: # Top
                 self.position[i] = [(self.position[i][0] - 1) % 7, self.position[i][1]]
-            elif action == 1: # Left
+            elif action[i] == 1: # Left
                 self.position[i] = [self.position[i][0], (self.position[i][1] - 1) % 7]
-            elif action == 2: # Right
+            elif action[i] == 2: # Right
                 self.position[i] = [self.position[i][0], (self.position[i][1] + 1) % 7]
-            elif action == 3: # Down
+            elif action[i] == 3: # Down
                 self.position[i] = [(self.position[i][0] + 1) % 7, self.position[i][1]]
             reward.append(self.rewards[i] [self.position[i][0]] [self.position[i][1]])
             done.append(False) if reward[i] == 0 else done.append(True)
@@ -88,17 +88,17 @@ class GridWorld(object):
 
 
 def main(_):
-    grid = GridWorld()
+    grid = GridWorld(dim = 1)
     buffer_size = 1000
 
     # Create the NET class
-    agent = proximalPolicyOptimisation.ProximalPolicyOptimisation(
-    	input_dim=[(7, 7),(7, 7)],
-    	output_dim=4,
+    agent = proximalPolicyOptimization.ProximalPolicyOptimization(
+    	input_dim=[(7, 7)],
+    	output_dim=[4],
     	pi_lr=0.001,
     	buffer_size=buffer_size,
         gamma=0.99,
-        model=simpleDenseConcat.SimpleDenseConcat()
+        model=simpleDense.SimpleDense()
     )
 
     rewards = []
@@ -120,17 +120,24 @@ def main(_):
 
             if done:
                 agent.finish_path(reward)
+                if len(rewards) > 100000:
+                    print("pop")
+                    for i in range(1000):
+                        rewards.pop(0)
                 rewards.append(reward)
-                if len(rewards) > 1000:
-                    rewards.pop(0)
-            if b == buffer_size:
+            if b >= buffer_size:
                 if not done:
                     agent.finish_path(0)
+                    done = True
+
                 agent.train()
                 b = 0
 
         if epoch % 1000 == 0:
             print("Rewards mean:%s" % np.mean(rewards))
+        if epoch % 100 == 0:
+            print(1/10 * epoch / 100)
+
 
     for epoch in range(10):
         import time

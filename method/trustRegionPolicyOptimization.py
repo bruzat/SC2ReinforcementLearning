@@ -2,15 +2,14 @@ import numpy as np
 from tensorflow.keras import backend as K
 from tensorflow.keras import optimizers
 from tensorflow.keras import utils as np_utils
+from tensorflow.keras import losses
 
 from method import simpleMethod
-
-from absl import app
 import os
 
-class PolicyGradient(simpleMethod.SimpleMethod):
+class TrustRegionPolicyOptimization(simpleMethod.SimpleMethod):
     """
-        Implementation of Policy Gradient
+        Implementation of Trust Region Policy Optimization
         This Implementation handle only continous values
     """
     def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size):
@@ -24,8 +23,9 @@ class PolicyGradient(simpleMethod.SimpleMethod):
         obs, act, rew, adv = self.buffer.get()
         loss = []
         entropy = []
+        old_mu = self.get_actions_values(obs)
         for step in range(5):
-            result = self.train_fn([*obs, *act, adv])
+            result = self.train_fn([*obs, *old_mu, *act, adv])
             loss.append(result[0])
             entropy.append(result[1])
 
@@ -34,20 +34,20 @@ class PolicyGradient(simpleMethod.SimpleMethod):
     def __build_train_fn(self):
         """Create a train function
         It replaces `model.fit(X, y)` because we use the output of model and use it for training.
-        For example, we need action placeholder
-        called `action_placeholder` that stores, which action we took at state `s`.
-        Hence, we can update the same action.
-        This function will create
-        `self.train_fn([state, action_one_hot, discount_advantage])`
-        which would train the model.
         """
         action_prob_placeholder = self.model.model.outputs
         advantage_placeholder = K.placeholder(shape=(None,),
                                                     name="advantage")
+
         action_placeholder = []
-        action_prob = []
+        old_mu_placeholder = []
+        action_prob_old = []
         loss = []
         for i in range(len(self.output_dim)):
+            o_mu_pl = K.placeholder(shape=(None,),
+                                    name="old_mu_placeholder"+str(i))
+            old_mu_placeholder.append(o_mu_pl)
+            
             act_pl = K.placeholder(shape=(None,),
                                    name="action_placeholder"+str(i),
                                    dtype='int32')
@@ -55,16 +55,21 @@ class PolicyGradient(simpleMethod.SimpleMethod):
 
             act_prob = K.sum(K.one_hot(act_pl,self.output_dim[i])
                                         * action_prob_placeholder[i] , axis=1)
-            act_prob = K.log(act_prob)
-            action_prob.append(act_prob)
 
-            l = -K.mean(act_prob * advantage_placeholder)
-            loss.append(l)
+            act_prob_old = K.sum(K.one_hot(act_pl,self.output_dim[i])
+                                        * o_mu_pl , axis=1)
+            action_prob_old.append(K.log(act_prob_old))
 
-        entropy = K.mean(-K.stack(action_prob))
+            logp = K.log(act_prob)
+            old_logp = K.log(act_prob_old)
+            kl  = losses.kullback_leibler_divergence(old_mu_placeholder[i],action_prob_placeholder[i])
+
+            l = (act_prob-act_prob_old) * advantage_placeholder - kl
+            loss.append(-K.mean(l))
+
+        entropy = K.mean(-K.stack(action_prob_old))
         loss = K.stack(loss)
         loss_p = K.sum(loss)
-
 
         updates = []
         for i in range(len(self.output_dim)):
@@ -73,6 +78,7 @@ class PolicyGradient(simpleMethod.SimpleMethod):
                                             params=self.model.trainable_weights))
 
         self.train_fn = K.function(inputs=[*self.model.model.inputs,
+                                           *old_mu_placeholder,
                                            *action_placeholder,
                                            advantage_placeholder],
                                     outputs=[loss_p,entropy],updates=updates)

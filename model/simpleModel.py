@@ -23,8 +23,8 @@ class SimpleModel(object):
         self.model = models.load_model(writepath)
         self.self_value()
 
-    def predict(self,input):
-        return self.model.predict(input)
+    def predict(self,env):
+        return self.model.predict(env)
 
     def self_value(self):
         self.output = self.model.output

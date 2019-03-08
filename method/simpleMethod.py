@@ -121,11 +121,19 @@ class SimpleMethod(object):
         self.buffer.finish_path(last_val)
 
     def get_action(self, state):
-        action_prob = np.squeeze(self.model.predict([[x] for x in state]))
-        return np.random.choice(np.arange(self.output_dim), p=action_prob)
+        action = self.model.predict([[x]for x in state])
+        action_prob = []
+        for i in range(len(self.output_dim)):
+            act = np.squeeze(action[i])
+            action_prob.append(np.random.choice(np.arange(self.output_dim[i]), p=act))
+
+        return action_prob
 
     def get_actions_values(self, states):
-        return np.squeeze(self.model.predict(states))
-        
+        if(len(self.output_dim)>1):
+            return np.squeeze(self.model.predict(states))
+        else:
+            return [np.squeeze(self.model.predict(states))]
+
     def __build_train_fn(self):
         pass
