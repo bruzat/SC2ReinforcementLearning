@@ -25,8 +25,8 @@ class Agent(base_agent.BaseAgent):
 		self.method = method(
 			model = model,
         	input_dim=[(80,80)],
-        	output_dim=[3,80*80,80*80],
-        	pi_lr=0.0001,
+        	output_dim=[2,80*80,80*80],
+        	pi_lr=0.001,
         	gamma=0.98,
         	buffer_size=512,
 		)
@@ -83,8 +83,6 @@ class Agent(base_agent.BaseAgent):
 		act = self.method.get_action([feat])
 
 		if act[0] == 0:
-			return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[]), act
-		elif act[0] == 1:
 			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
 				# Convert the prediction into positions
 				position = Agent.prediction_to_position([act[1]])

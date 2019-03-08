@@ -1,7 +1,7 @@
 from tensorflow import keras as k
 from agent import agent2
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
-from model import simpleDense, multiDense, simpleConv
+from model import simpleDense, multiDense, simpleConv, multiConv
 
 import argparse
 import sys
