@@ -37,7 +37,7 @@ class MultiDense(simpleModel.SimpleModel):
             dense_output_dim = layers.Dense(output_dim)(net)
             softmax_output.append(layers.Activation("softmax")(dense_output_dim))
 
-        if len(list_output_dim) > 1:
+        if len(list_input_dim) > 1:
             self.model = Model(inputs=X_inputs, outputs=softmax_output)
         else:
             self.model = Model(inputs=[X_input], outputs=softmax_output)

@@ -24,7 +24,7 @@ def main(_):
 	parser.add_argument('--method', type=str, nargs='?', const='method', default='methode', help='Name of method')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
-	parser.add_argument('--training', type=bool, nargs='?', const=True, default=True, help="if it is training")
+	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	args, unknown_flags = parser.parse_known_args()
 
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
-	parser.add_argument('--training', type=bool, nargs='?', const=True, default=True, help="if it is training")
+	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)

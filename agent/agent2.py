@@ -24,8 +24,8 @@ class Agent(base_agent.BaseAgent):
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=[(64,64)],
-        	output_dim=[64*64],
+        	input_dim=[(80,80)],
+        	output_dim=[3,80*80,80*80],
         	pi_lr=0.0001,
         	gamma=0.98,
         	buffer_size=512,
@@ -43,8 +43,7 @@ class Agent(base_agent.BaseAgent):
 		self.score += reward
 		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
 		# Store the reward
-		action_r = action[0]*64 + action[1]
-		self.method.store(feat, action_r, reward)
+		self.method.store(feat, action, reward)
 		# Increase the current step
 		self.nb_steps += 1
 		# Finish the episode on reward == 1
@@ -78,19 +77,26 @@ class Agent(base_agent.BaseAgent):
 		# call the parent class to have pysc2 setup rewards/etc for u
 		super(Agent, self).step(obs)
 		# if we can move our army (we have something selected)
-		if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
-			# Get the features of the screen
-			feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
-        	# Step with ppo according to this state
-			act = self.method.get_action([feat])
-			# Convert the prediction into positions
-			positions = Agent.prediction_to_position([act])
-			# Get a random location on the map
-			return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], positions[0]])
+		# Get the features of the screen
+		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
+    	# Step with ppo according to this state
+		act = self.method.get_action([feat])
 
-		# if we can't move, we havent selected our army, so selecto ur army
+		if act[0] == 0:
+			return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[]), act
+		elif act[0] == 1:
+			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
+				# Convert the prediction into positions
+				position = Agent.prediction_to_position([act[1]])
+				# Get a random location on the map
+				return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], position[0]]) , act
+			else:
+				return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[]), act
 		else:
-			return actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])
+			position1 = Agent.prediction_to_position([act[1]])
+			position2 = Agent.prediction_to_position([act[2]])
+			return actions.FunctionCall(actions.FUNCTIONS.select_rect.id, [[0], position1[0], position2[0]]) , act
+
 
 	@staticmethod
 	def get_feature_screen(obs, screen_feature):
@@ -99,7 +105,7 @@ class Agent(base_agent.BaseAgent):
 		return np.array(mapp)
 
 	@staticmethod
-	def prediction_to_position(pi, dim = 64):
+	def prediction_to_position(pi, dim = 80):
 		# Translate the prediction to y,x position
 		pirescale = np.expand_dims(pi, axis=1)
 		pirescale = np.append(pirescale, np.zeros_like(pirescale), axis=1)

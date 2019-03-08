@@ -131,7 +131,7 @@ class SimpleMethod(object):
 
     def get_actions_values(self, states):
         if(len(self.output_dim)>1):
-            return np.squeeze(self.model.predict(states))
+            return self.model.predict(states)
         else:
             return [np.squeeze(self.model.predict(states))]
 
