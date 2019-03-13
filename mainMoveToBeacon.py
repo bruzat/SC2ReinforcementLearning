@@ -3,6 +3,7 @@ from agent import agent
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
 from model import simpleDense, multiDense, simpleConv
 
+
 import argparse
 import sys
 import os
@@ -21,7 +22,7 @@ dict_method = { 'pg': policyGradient.PolicyGradient,
 def main(_):
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
-	parser.add_argument('--method', type=str, nargs='?', const='method', default='methode', help='Name of method')
+	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
@@ -32,7 +33,7 @@ def main(_):
 	method_name = args.method
 	visualize = args.visualize
 	replay = args.replay
-	is_training = args.training
+	is_training = args.no_training
 	load_model = args.load_model
 
 	if model_name in dict_model:
@@ -67,6 +68,7 @@ def main(_):
 
 			for i in range(100000):
 				ag.setup(env.observation_spec(), env.action_spec())
+				drawModel(ag.method.model.model)
 				timesteps = env.reset()
 				ag.reset()
 				timesteps = env.step([actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])])
@@ -82,7 +84,6 @@ def main(_):
 
 	except KeyboardInterrupt:
 		pass
-
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()

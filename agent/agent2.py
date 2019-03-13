@@ -15,7 +15,7 @@ class Agent(base_agent.BaseAgent):
 		self.model_name = model_name
 		self.method_name = method_name
 		self.nb_steps = 0
-		self.max_steps = 512
+		self.max_steps = 2048
 		self.epoch = 0
 		self.path = path
 		self.score = 0
@@ -24,11 +24,11 @@ class Agent(base_agent.BaseAgent):
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=[(80,80)],
-        	output_dim=[2,80*80,80*80],
-        	pi_lr=0.001,
+        	input_dim=[(3,64,64),(2,7)],
+        	output_dim=[2,64*64,64*64],
+        	pi_lr=0.0001,
         	gamma=0.98,
-        	buffer_size=512,
+        	buffer_size=2048,
 		)
 
 
@@ -37,11 +37,13 @@ class Agent(base_agent.BaseAgent):
             #Load the existing model
 			self.epoch = self.method.load(self.path, self.method_name, self.model_name)
 
+		#self.logger.drawModel(self.method.model.model, self.path, self.method_name, self.model_name)
+
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
-		reward = 0 if reward == 0 else 1
 		self.score += reward
-		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
+		reward = -1 if reward == 0 else 1
+		feat = Agent.get_feature_screen(obs)
 		# Store the reward
 		self.method.store(feat, action, reward)
 		# Increase the current step
@@ -69,7 +71,7 @@ class Agent(base_agent.BaseAgent):
 			self.nb_steps = 0
 			self.epoch += 1
 			# Save every 100 epochs
-			if (self.epoch-1) % 300 == 0:
+			if (self.epoch-1) % 50 == 0:
 				self.method.save(self.path,self.method_name,self.model_name,self.epoch)
 
 	def step(self, obs):
@@ -78,9 +80,9 @@ class Agent(base_agent.BaseAgent):
 		super(Agent, self).step(obs)
 		# if we can move our army (we have something selected)
 		# Get the features of the screen
-		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
+		feat = Agent.get_feature_screen(obs)
     	# Step with ppo according to this state
-		act = self.method.get_action([feat])
+		act = self.method.get_action(feat)
 
 		if act[0] == 0:
 			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
@@ -97,13 +99,24 @@ class Agent(base_agent.BaseAgent):
 
 
 	@staticmethod
-	def get_feature_screen(obs, screen_feature):
+	def get_feature_screen(obs):
 		# Get the feature associated with the observation
-		mapp = obs.observation["feature_screen"][screen_feature.index]
-		return np.array(mapp)
+		mapp = []
+		mapp.append(obs.observation["feature_screen"][features.SCREEN_FEATURES.player_relative.index])
+		mapp.append(obs.observation["feature_screen"][features.SCREEN_FEATURES.selected.index])
+		mapp.append(obs.observation["feature_screen"][features.SCREEN_FEATURES.unit_density.index])
+
+		multi_select = np.zeros((2,7))
+		obs_mult = obs.observation["multi_select"]
+		for i in range(len(multi_select)):
+			if len(obs_mult) > i:
+				multi_select[i] = obs_mult[i]
+			else:
+				break
+		return [np.array(mapp),multi_select]
 
 	@staticmethod
-	def prediction_to_position(pi, dim = 80):
+	def prediction_to_position(pi, dim = 64):
 		# Translate the prediction to y,x position
 		pirescale = np.expand_dims(pi, axis=1)
 		pirescale = np.append(pirescale, np.zeros_like(pirescale), axis=1)

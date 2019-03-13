@@ -13,20 +13,19 @@ class Buffer:
     def __init__(self, obs_dim, act_dim, size, gamma=0.99, lam=0.95):
         # Obs buffer
         self.obs_dim = obs_dim
-        if type(self.obs_dim) is list or type(self.obs_dim) is tuple:
-            self.obs_buf = []
-            for dim in self.obs_dim:
+        self.obs_buf = []
+        for dim in self.obs_dim:
+            if dim[0] == None:
+                self.obs_buf.append([])
+            else :
                 self.obs_buf.append(np.zeros(Buffer.combined_shape(size, dim), dtype=np.float32))
-        else:
-            self.obs_buf = np.zeros(Buffer.combined_shape(size, self.obs_dim), dtype=np.float32)
+
         # Actions buffer
         self.act_dim = act_dim
-        if type(self.act_dim) is list or type(self.act_dim) is tuple:
-            self.act_buf = []
-            for dim in self.act_dim:
-                self.act_buf.append(np.zeros(size, dtype=np.float32))
-        else:
-            self.act_buf = np.zeros(size, dtype=np.float32)
+        self.act_buf = []
+        for dim in self.act_dim:
+            self.act_buf.append(np.zeros(size, dtype=np.float32))
+
         # Advantages buffer
         self.adv_buf = np.zeros(size, dtype=np.float32)
         # Rewards buffer
@@ -57,17 +56,18 @@ class Buffer:
             Append one timestep of agent-environment interaction to the buffer.
         """
         assert self.ptr < self.max_size
-        if type(self.obs_dim) is list or type(self.obs_dim) is tuple:
-            for i in range(len(self.obs_dim)):
-                self.obs_buf[i][self.ptr] = obs[i]
-        else:
-            self.obs_buf[self.ptr] = obs
 
-        if type(self.act_dim) is list or type(self.act_dim) is tuple:
-            for i in range(len(self.act_dim)):
-                self.act_buf[i][self.ptr] = act[i]
-        else:
-            self.act_buf[self.ptr] = act
+        for i in range(len(self.obs_dim)):
+            if self.obs_dim[i][0] == None:
+                list_obs = []
+                for y in len(obs[i]):
+                    list_obs.append(obs[i][y])
+                self.obs_buf[i].append(list_obs)
+            else :
+                self.obs_buf[i][self.ptr] = obs[i]
+
+        for i in range(len(self.act_dim)):
+            self.act_buf[i][self.ptr] = act[i]
 
         self.rew_buf[self.ptr] = rew
         self.ptr += 1
@@ -122,6 +122,7 @@ class SimpleMethod(object):
 
     def get_action(self, state):
         action = self.model.predict([[x]for x in state])
+
         action_prob = []
         for i in range(len(self.output_dim)):
             act = np.squeeze(action[i])

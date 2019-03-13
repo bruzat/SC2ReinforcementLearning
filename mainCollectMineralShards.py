@@ -1,7 +1,7 @@
 from tensorflow import keras as k
 from agent import agent2
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
-from model import simpleDense, multiDense, simpleConv, multiConv
+from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
 
 import argparse
 import sys
@@ -13,7 +13,9 @@ from pysc2.lib import actions, features
 
 dict_model = 	{'simpleDense':simpleDense.SimpleDense,
 				'multiDense':multiDense.MultiDense,
-				'simpleConv':simpleConv.SimpleConv}
+				'simpleConv':simpleConv.SimpleConv,
+				'multiConv':multiConv.MultiConv,
+				'spCMS':spCMS.SpCMS}
 dict_method = { 'pg': policyGradient.PolicyGradient,
 				 'trpo': trustRegionPolicyOptimization.TrustRegionPolicyOptimization,
 				 'ppo': proximalPolicyOptimization.ProximalPolicyOptimization}
@@ -57,7 +59,7 @@ def main(_):
 
 	try:
 		with sc2_env.SC2Env(map_name="CollectMineralShards", players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
-			feature_dimensions=features.Dimensions(screen=80, minimap=64),
+			feature_dimensions=features.Dimensions(screen=64, minimap=64),
 			use_feature_units=True),
 			step_mul=step_mul, # Number of step before to ask the next action to from the agent
 			visualize=visualize,

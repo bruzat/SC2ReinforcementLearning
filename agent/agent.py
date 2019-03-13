@@ -37,6 +37,8 @@ class Agent(base_agent.BaseAgent):
             #Load the existing model
 			self.epoch = self.method.load(self.path, self.method_name, self.model_name)
 
+		#self.logger.drawModel(self.method.model.model, self.path, self.method_name, self.model_name)
+
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
 		reward = 0 if reward == 0 else 1

@@ -56,21 +56,19 @@ class PolicyGradient(simpleMethod.SimpleMethod):
             act_prob = K.sum(K.one_hot(act_pl,self.output_dim[i])
                                         * action_prob_placeholder[i] , axis=1)
             act_prob = K.log(act_prob)
-            action_prob.append(act_prob)
+            action_prob.append(K.mean(-act_prob))
 
             l = -K.mean(act_prob * advantage_placeholder)
             loss.append(l)
 
-        entropy = K.mean(-K.stack(action_prob))
+        entropy = K.sum(action_prob)
         loss = K.stack(loss)
         loss_p = K.sum(loss)
 
 
-        updates = []
-        for i in range(len(self.output_dim)):
-            adam = optimizers.Adam(lr = self.pi_lr)
-            updates.append(adam.get_updates(loss=loss[i],
-                                            params=self.model.trainable_weights))
+        adam = optimizers.Adam(lr = self.pi_lr)
+        updates=adam.get_updates(loss=loss,
+                                        params=self.model.trainable_weights)
 
         self.train_fn = K.function(inputs=[*self.model.model.inputs,
                                            *action_placeholder,

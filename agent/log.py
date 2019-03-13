@@ -1,4 +1,5 @@
 import os
+from tensorflow.keras.utils import plot_model
 
 class Logger(object):
     def __init__(self, log_it=20):
@@ -27,3 +28,9 @@ class Logger(object):
                 file.write(self.log)
             self.log = ''
             self.it_log = 0
+
+    def drawModel(self,model,path, method_name, model_name):
+        os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin/'
+        writepath = path+'/'+method_name+'/'+model_name+'/model.png'
+        print(writepath)
+        plot_model(model, to_file=writepath)

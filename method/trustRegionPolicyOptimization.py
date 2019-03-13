@@ -47,7 +47,7 @@ class TrustRegionPolicyOptimization(simpleMethod.SimpleMethod):
             o_mu_pl = K.placeholder(shape=(None,),
                                     name="old_mu_placeholder"+str(i))
             old_mu_placeholder.append(o_mu_pl)
-            
+
             act_pl = K.placeholder(shape=(None,),
                                    name="action_placeholder"+str(i),
                                    dtype='int32')
@@ -58,7 +58,7 @@ class TrustRegionPolicyOptimization(simpleMethod.SimpleMethod):
 
             act_prob_old = K.sum(K.one_hot(act_pl,self.output_dim[i])
                                         * o_mu_pl , axis=1)
-            action_prob_old.append(K.log(act_prob_old))
+            action_prob_old.append(K.mean(-K.log(act_prob_old)))
 
             logp = K.log(act_prob)
             old_logp = K.log(act_prob_old)
@@ -67,15 +67,13 @@ class TrustRegionPolicyOptimization(simpleMethod.SimpleMethod):
             l = (act_prob-act_prob_old) * advantage_placeholder - kl
             loss.append(-K.mean(l))
 
-        entropy = K.mean(-K.stack(action_prob_old))
+        entropy = K.sum(action_prob_old)
         loss = K.stack(loss)
         loss_p = K.sum(loss)
 
-        updates = []
-        for i in range(len(self.output_dim)):
-            adam = optimizers.Adam(lr = self.pi_lr)
-            updates.append(adam.get_updates(loss=loss[i],
-                                            params=self.model.trainable_weights))
+        adam = optimizers.Adam(lr = self.pi_lr)
+        updates=adam.get_updates(loss=loss,
+                                        params=self.model.trainable_weights)
 
         self.train_fn = K.function(inputs=[*self.model.model.inputs,
                                            *old_mu_placeholder,

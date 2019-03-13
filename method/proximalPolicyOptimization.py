@@ -60,7 +60,7 @@ class ProximalPolicyOptimization(simpleMethod.SimpleMethod):
             act_prob_old = K.sum(K.one_hot(act_pl,self.output_dim[i])
                                         * o_mu_pl , axis=1)
 
-            action_prob_old.append(K.log(act_prob_old))
+            action_prob_old.append(K.mean(-K.log(act_prob_old)))
 
             r = act_prob/(act_prob_old + 1e-10)
 
@@ -68,15 +68,13 @@ class ProximalPolicyOptimization(simpleMethod.SimpleMethod):
             l = l + 1e-3 * (act_prob * K.log(act_prob + 1e-10))
             loss.append(-K.mean(l))
 
-        entropy = K.mean(-K.stack(action_prob_old))
+        entropy = K.sum(action_prob_old)
         loss = K.stack(loss)
         loss_p = K.sum(loss)
 
-        updates = []
-        for i in range(len(self.output_dim)):
-            adam = optimizers.Adam(lr = self.pi_lr)
-            updates.append(adam.get_updates(loss=loss[i],
-                                            params=self.model.trainable_weights))
+        adam = optimizers.Adam(lr = self.pi_lr)
+        updates=adam.get_updates(loss=loss,
+                                        params=self.model.trainable_weights)
 
         self.train_fn = K.function(inputs=[*self.model.model.inputs,
                                            *old_mu_placeholder,
