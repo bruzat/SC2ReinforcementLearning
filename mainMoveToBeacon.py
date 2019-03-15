@@ -27,6 +27,7 @@ def main(_):
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
+	parser.add_argument('--logger_path' type=str, default='./logger', help='path to save log')
 	args, unknown_flags = parser.parse_known_args()
 
 	model_name = args.model
@@ -35,6 +36,7 @@ def main(_):
 	replay = args.replay
 	is_training = args.no_training
 	load_model = args.load_model
+	logger_path = args.logger_path
 
 	if model_name in dict_model:
 		model = dict_model[model_name]
@@ -53,7 +55,7 @@ def main(_):
 	step_mul = 16 if model_name is None else 16
 	save_replay_episodes = 10 if replay else 0
 
-	ag = agent.Agent(path='./logger/MoveToBeacon', model_name=model_name, model = model, load_model=load_model,
+	ag = agent.Agent(path=logger_path+'/MoveToBeacon', model_name=model_name, model = model, load_model=load_model,
 	 				method_name=method_name, method = method)
 
 	try:
@@ -93,6 +95,7 @@ if __name__ == '__main__':
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
+	parser.add_argument('--logger_path' type=str, default='./logger', help='path to save log')
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
 	app.run(main, argv=sys.argv[:1] + unknown_flags)
