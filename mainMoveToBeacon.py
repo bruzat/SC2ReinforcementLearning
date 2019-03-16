@@ -70,7 +70,6 @@ def main(_):
 
 			for i in range(100000):
 				ag.setup(env.observation_spec(), env.action_spec())
-				drawModel(ag.method.model.model)
 				timesteps = env.reset()
 				ag.reset()
 				timesteps = env.step([actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])])
