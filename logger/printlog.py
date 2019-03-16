@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 
 def main(_):
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--path', type=str, help='Name of path')
 	parser.add_argument('--model', type=str, help='Name of the model')
 	parser.add_argument('--method', type=str, help='Name of the method')
 	parser.add_argument('--map', type=str, help='Name of the method')
@@ -21,8 +22,9 @@ def main(_):
 	method = args.method
 	map = args.map
 	number_mean = args.nb
+	path = args.path
 	print(number_mean)
-	log_train = pd.read_csv('./'+map+'/'+method+'/'+model+'/log.txt')
+	log_train = pd.read_csv(path+'/'+map+'/'+method+'/'+model+'/log.txt')
 	log_train.columns = ['Epoch', 'Loss', 'Entropy','Score','MeanReward']
 
 
@@ -65,6 +67,7 @@ def main(_):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--path', type=str, help='Name of path')
 	parser.add_argument('--model', type=str, help='Name of the model')
 	parser.add_argument('--method', type=str, help='Name of the method')
 	parser.add_argument('--map', type=str, help='Name of the method')
