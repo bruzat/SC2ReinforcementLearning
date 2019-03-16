@@ -32,4 +32,5 @@ class Logger(object):
 
     def drawModel(self,model,path, method_name, model_name):
         writepath = path+'/'+method_name+'/'+model_name+'/model.png'
+        os.makedirs(os.path.dirname(writepath), exist_ok=True)
         plot_model(model, to_file=writepath)

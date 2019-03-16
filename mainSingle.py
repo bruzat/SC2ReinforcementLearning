@@ -1,7 +1,7 @@
 from tensorflow import keras as k
 from agent import agentSelectedUnits, agentSimple
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
-from model import simpleDense, multiDense, simpleConv
+from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
 
 
 import argparse
@@ -12,9 +12,11 @@ from absl import app, flags
 from pysc2.env import sc2_env
 from pysc2.lib import actions, features
 
-dict_model = 	{'simpleDense':simpleDense.SimpleDense,
-				'multiDense':multiDense.MultiDense,
-				'simpleConv':simpleConv.SimpleConv}
+dict_model = 	{'simpleDense': simpleDense.SimpleDense,
+				'multiDense': multiDense.MultiDense,
+				'simpleConv': simpleConv.SimpleConv,
+				'multiConv': multiConv.MultiConv,
+				'spCMS': spCMS.SpCMS}
 
 dict_method = { 'pg': policyGradient.PolicyGradient,
 				 'trpo': trustRegionPolicyOptimization.TrustRegionPolicyOptimization,
@@ -30,8 +32,8 @@ def main(_):
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--map', type=str, default='MoveToBeacon', help='Name of map')
 	parser.add_argument('--agent', type=str, default='simple', help='Name of agent')
-	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
-	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
+	parser.add_argument('--model', type=str, default='model', help='Name of model')
+	parser.add_argument('--method', type=str, default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
@@ -55,6 +57,7 @@ def main(_):
 		map = dict_map['MoveToBeacon']
 	print("map is : " + str(map))
 
+
 	if agent_name in dict_agent:
 		agent = dict_agent[agent_name]
 	else:
@@ -69,12 +72,13 @@ def main(_):
 	print("model is : " + str(model))
 	model = model()
 
+
 	if method_name in dict_method:
 		method = dict_method[method_name]
 	else:
 		method = dict_method['pg']
-
 	print("method is : " + str(method))
+
 
 	step_mul = 16 if model_name is None else 16
 	save_replay_episodes = 10 if replay else 0
@@ -114,8 +118,8 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--map', type=str, default='MoveToBeacon', help='Name of map')
 	parser.add_argument('--agent', type=str, default='simple', help='Name of agent')
-	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
-	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
+	parser.add_argument('--model', type=str, default='model', help='Name of model')
+	parser.add_argument('--method', type=str, default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
