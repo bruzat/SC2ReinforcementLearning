@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def main(_):
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--path', type=str, help='Name of path')
+	parser.add_argument('--path', type=str, default=".", help='Name of path')
 	parser.add_argument('--model', type=str, help='Name of the model')
 	parser.add_argument('--method', type=str, help='Name of the method')
 	parser.add_argument('--map', type=str, help='Name of the method')
@@ -43,7 +43,7 @@ def main(_):
 			Score.append(sc)
 			MeanReward.append(mr)
 
-
+	plt.figure()
 	plt.subplot(2,2,1)
 	plt.plot(Loss)
 	plt.xlabel('Loss')
@@ -63,6 +63,7 @@ def main(_):
 	plt.plot(Score)
 	plt.xlabel('Epoch')
 	plt.legend(['MeanReward'], loc='upper left')
+	
 	plt.show()
 
 if __name__ == '__main__':
