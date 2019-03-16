@@ -1,5 +1,5 @@
 from tensorflow import keras as k
-from agent import agentSelectedUnits, agentSimple
+from agent import agentSelectedUnits, agentSimple, agentFindAndDefeatZerglings
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
 from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
 
@@ -23,10 +23,12 @@ dict_method = { 'pg': policyGradient.PolicyGradient,
 				 'ppo': proximalPolicyOptimization.ProximalPolicyOptimization}
 
 dict_map = {'MoveToBeacon': 'MoveToBeacon',
-			'CollectMineralShards': 'CollectMineralShards'}
+			'CollectMineralShards': 'CollectMineralShards',
+			'FindAndDefeatZerglings': 'FindAndDefeatZerglings'}
 
 dict_agent = {'simple': agentSimple.AgentSimple,
-			'selectedUnits':agentSelectedUnits.AgentSelectedUnits}
+			'selectedUnits': agentSelectedUnits.AgentSelectedUnits,
+			'FindAndDefeatZerglings': agentFindAndDefeatZerglings.AgentFindAndDefeatZerglings}
 
 def main(_):
 	parser = argparse.ArgumentParser()
@@ -80,7 +82,7 @@ def main(_):
 	print("method is : " + str(method))
 
 
-	step_mul = 16 if model_name is None else 16
+	step_mul = 8 if model_name is None else 8
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
