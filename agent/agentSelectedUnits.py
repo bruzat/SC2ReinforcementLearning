@@ -28,7 +28,7 @@ class AgentSelectedUnits(base_agent.BaseAgent):
         	output_dim=[2,64*64,64*64],
         	pi_lr=0.0001,
         	gamma=0.98,
-        	buffer_size=2048,
+        	buffer_size=2048
 		)
 
 

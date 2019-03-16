@@ -26,9 +26,9 @@ class AgentSimple(base_agent.BaseAgent):
 			model = model,
         	input_dim=[(64,64)],
         	output_dim=[64*64],
-        	pi_lr=0.001,
+        	pi_lr=0.01,
         	gamma=0.98,
-        	buffer_size=512,
+        	buffer_size=512
 		)
 
 
