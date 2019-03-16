@@ -102,14 +102,16 @@ def main(_):
 				ag.reset()
 				timesteps = env.step([actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])])
 				while True:
-					action = ag.step(timesteps[0])
+					action, action_output = ag.step(timesteps[0])
 					step_actions = [action]
 					old_timesteps = timesteps
 					timesteps = env.step(step_actions)
 					if(is_training):
-						ag.train(timesteps[0], old_timesteps[0],action.arguments[1], timesteps[0].reward)
+						ag.train(timesteps[0], old_timesteps[0],action_output, timesteps[0].reward)
 					if timesteps[0].last():
 						break
+
+
 
 	except KeyboardInterrupt:
 		pass

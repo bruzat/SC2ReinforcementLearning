@@ -26,7 +26,7 @@ class AgentSimple(base_agent.BaseAgent):
 			model = model,
         	input_dim=[(64,64)],
         	output_dim=[64*64],
-        	pi_lr=0.0001,
+        	pi_lr=0.001,
         	gamma=0.98,
         	buffer_size=512,
 		)
@@ -41,12 +41,11 @@ class AgentSimple(base_agent.BaseAgent):
 
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
-		reward = 0 if reward == 0 else 1
 		self.score += reward
+		reward = -1 if reward == 0 else 1
 		feat = AgentSimple.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
 		# Store the reward
-		action_r = action[0]*64 + action[1]
-		self.method.store(feat, action_r, reward)
+		self.method.store(feat, action, reward)
 		# Increase the current step
 		self.nb_steps += 1
 		# Finish the episode on reward == 1
@@ -80,19 +79,20 @@ class AgentSimple(base_agent.BaseAgent):
 		# call the parent class to have pysc2 setup rewards/etc for u
 		super(AgentSimple, self).step(obs)
 		# if we can move our army (we have something selected)
+		# Get the features of the screen
+		feat = AgentSimple.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
+		# Step with ppo according to this state
+		act = self.method.get_action([feat])
+
 		if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
-			# Get the features of the screen
-			feat = AgentSimple.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
-        	# Step with ppo according to this state
-			act = self.method.get_action([feat])
 			# Convert the prediction into positions
 			positions = AgentSimple.prediction_to_position([act])
 			# Get a random location on the map
-			return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], positions[0]])
+			return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], positions[0]]), act
 
 		# if we can't move, we havent selected our army, so selecto ur army
 		else:
-			return actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])
+			return actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]]), act
 
 	@staticmethod
 	def get_feature_screen(obs, screen_feature):
