@@ -7,7 +7,6 @@ from absl import app, flags
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-%matplotlib inline
 
 
 def main(_):
