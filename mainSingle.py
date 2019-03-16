@@ -1,7 +1,8 @@
 from tensorflow import keras as k
-from agent import agent2
+from agent import agentSelectedUnits, agentSimple
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
-from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
+from model import simpleDense, multiDense, simpleConv
+
 
 import argparse
 import sys
@@ -13,17 +14,24 @@ from pysc2.lib import actions, features
 
 dict_model = 	{'simpleDense':simpleDense.SimpleDense,
 				'multiDense':multiDense.MultiDense,
-				'simpleConv':simpleConv.SimpleConv,
-				'multiConv':multiConv.MultiConv,
-				'spCMS':spCMS.SpCMS}
+				'simpleConv':simpleConv.SimpleConv}
+
 dict_method = { 'pg': policyGradient.PolicyGradient,
 				 'trpo': trustRegionPolicyOptimization.TrustRegionPolicyOptimization,
 				 'ppo': proximalPolicyOptimization.ProximalPolicyOptimization}
 
+dict_map = {'MoveToBeacon': 'MoveToBeacon',
+			'CollectMineralShards': 'CollectMineralShards'}
+
+dict_agent = {'simple': agentSimple.AgentSimple,
+			'selectedUnits':agentSelectedUnits.AgentSelectedUnits}
+
 def main(_):
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--map', type=str, default='MoveToBeacon', help='Name of map')
+	parser.add_argument('--agent', type=str, default='simple', help='Name of agent')
 	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
-	parser.add_argument('--method', type=str, nargs='?', const='method', default='methode', help='Name of method')
+	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')
 	parser.add_argument('--replay', type=bool, help="Save a replay of the experiment")
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
@@ -38,6 +46,21 @@ def main(_):
 	is_training = args.no_training
 	load_model = args.load_model
 	logger_path = args.logger_path
+	map_name = args.map
+	agent_name = args.agent
+
+	if map_name in dict_map:
+		map = dict_map[map_name]
+	else:
+		map = dict_map['MoveToBeacon']
+	print("map is : " + str(map))
+
+	if agent_name in dict_agent:
+		agent = dict_agent[agent_name]
+	else:
+		agent = dict_agent['simple']
+	print("agent is : " + str(agent))
+
 
 	if model_name in dict_model:
 		model = dict_model[model_name]
@@ -53,14 +76,14 @@ def main(_):
 
 	print("method is : " + str(method))
 
-	step_mul = 8 if model_name is None else 8
+	step_mul = 16 if model_name is None else 16
 	save_replay_episodes = 10 if replay else 0
 
-	ag = agent2.Agent(path=logger_path+'/CollectMineralShards', model_name=model_name, model = model, load_model=load_model,
+	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
 	 				method_name=method_name, method = method)
 
 	try:
-		with sc2_env.SC2Env(map_name="CollectMineralShards", players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
+		with sc2_env.SC2Env(map_name=map, players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
 			feature_dimensions=features.Dimensions(screen=64, minimap=64),
 			use_feature_units=True),
 			step_mul=step_mul, # Number of step before to ask the next action to from the agent
@@ -75,21 +98,22 @@ def main(_):
 				ag.reset()
 				timesteps = env.step([actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])])
 				while True:
-					action, action_output = ag.step(timesteps[0])
+					action = ag.step(timesteps[0])
 					step_actions = [action]
 					old_timesteps = timesteps
 					timesteps = env.step(step_actions)
 					if(is_training):
-						ag.train(timesteps[0], old_timesteps[0],action_output, timesteps[0].reward)
+						ag.train(timesteps[0], old_timesteps[0],action.arguments[1], timesteps[0].reward)
 					if timesteps[0].last():
 						break
 
 	except KeyboardInterrupt:
 		pass
 
-
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
+	parser.add_argument('--map', type=str, default='MoveToBeacon', help='Name of map')
+	parser.add_argument('--agent', type=str, default='simple', help='Name of agent')
 	parser.add_argument('--model', type=str, nargs='?', const='model', default='model', help='Name of model')
 	parser.add_argument('--method', type=str, nargs='?', const='methode', default='method', help='Name of methode')
 	parser.add_argument('--load_model', type=bool, help='if load trained model')

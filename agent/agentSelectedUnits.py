@@ -4,18 +4,18 @@ import numpy as np
 
 import agent.log as log
 
-class Agent(base_agent.BaseAgent):
+class AgentSelectedUnits(base_agent.BaseAgent):
 	"""
 		An agent for doing a simple movement form one point to another.
 	"""
 
 	def __init__(self,  path='logger/', model_name='model', model=None, load_model=False, method_name="method", method=None):
-		super(Agent, self).__init__()
+		super(AgentSelectedUnits, self).__init__()
 		self.logger = log.Logger()
 		self.model_name = model_name
 		self.method_name = method_name
 		self.nb_steps = 0
-		self.max_steps = 512
+		self.max_steps = 2048
 		self.epoch = 0
 		self.path = path
 		self.score = 0
@@ -24,11 +24,11 @@ class Agent(base_agent.BaseAgent):
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=[(64,64)],
-        	output_dim=[64*64],
+        	input_dim=[(3,64,64),(2,7)],
+        	output_dim=[2,64*64,64*64],
         	pi_lr=0.0001,
         	gamma=0.98,
-        	buffer_size=512,
+        	buffer_size=2048,
 		)
 
 
@@ -37,16 +37,15 @@ class Agent(base_agent.BaseAgent):
             #Load the existing model
 			self.epoch = self.method.load(self.path, self.method_name, self.model_name)
 
-		#self.logger.drawModel(self.method.model.model, self.path, self.method_name, self.model_name)
+		self.logger.drawModel(self.method.model.model, self.path, self.method_name, self.model_name)
 
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
-		reward = 0 if reward == 0 else 1
 		self.score += reward
-		feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
+		reward = -1 if reward == 0 else 1
+		feat = AgentSelectedUnits.get_feature_screen(obs)
 		# Store the reward
-		action_r = action[0]*64 + action[1]
-		self.method.store(feat, action_r, reward)
+		self.method.store(feat, action, reward)
 		# Increase the current step
 		self.nb_steps += 1
 		# Finish the episode on reward == 1
@@ -72,33 +71,49 @@ class Agent(base_agent.BaseAgent):
 			self.nb_steps = 0
 			self.epoch += 1
 			# Save every 100 epochs
-			if (self.epoch-1) % 300 == 0:
+			if (self.epoch-1) % 50 == 0:
 				self.method.save(self.path,self.method_name,self.model_name,self.epoch)
 
 	def step(self, obs):
 		# step function gets called automatically by pysc2 environment
 		# call the parent class to have pysc2 setup rewards/etc for u
-		super(Agent, self).step(obs)
+		super(AgentSelectedUnits, self).step(obs)
 		# if we can move our army (we have something selected)
-		if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
-			# Get the features of the screen
-			feat = Agent.get_feature_screen(obs, features.SCREEN_FEATURES.player_relative)
-        	# Step with ppo according to this state
-			act = self.method.get_action([feat])
-			# Convert the prediction into positions
-			positions = Agent.prediction_to_position([act])
-			# Get a random location on the map
-			return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], positions[0]])
+		# Get the features of the screen
+		feat = AgentSelectedUnits.get_feature_screen(obs)
+    	# Step with ppo according to this state
+		act = self.method.get_action(feat)
 
-		# if we can't move, we havent selected our army, so selecto ur army
+		if act[0] == 0:
+			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
+				# Convert the prediction into positions
+				position = AgentSelectedUnits.prediction_to_position([act[1]])
+				# Get a random location on the map
+				return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], position[0]]) , act
+			else:
+				return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[]), act
 		else:
-			return actions.FunctionCall(actions.FUNCTIONS.select_army.id, [[0]])
+			position1 = AgentSelectedUnits.prediction_to_position([act[1]])
+			position2 = AgentSelectedUnits.prediction_to_position([act[2]])
+			return actions.FunctionCall(actions.FUNCTIONS.select_rect.id, [[0], position1[0], position2[0]]) , act
+
 
 	@staticmethod
-	def get_feature_screen(obs, screen_feature):
+	def get_feature_screen(obs):
 		# Get the feature associated with the observation
-		mapp = obs.observation["feature_screen"][screen_feature.index]
-		return np.array(mapp)
+		mapp = []
+		mapp.append(obs.observation["feature_screen"][features.SCREEN_FEATURES.player_relative.index])
+		mapp.append(obs.observation["feature_screen"][features.SCREEN_FEATURES.selected.index])
+		mapp.append(obs.observation["feature_screen"][features.SCREEN_FEATURES.unit_density.index])
+
+		multi_select = np.zeros((2,7))
+		obs_mult = obs.observation["multi_select"]
+		for i in range(len(multi_select)):
+			if len(obs_mult) > i:
+				multi_select[i] = obs_mult[i]
+			else:
+				break
+		return [np.array(mapp),multi_select]
 
 	@staticmethod
 	def prediction_to_position(pi, dim = 64):
