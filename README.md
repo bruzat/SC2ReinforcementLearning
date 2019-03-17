@@ -12,4 +12,3 @@ On MoveToBeacon with policy gradient and simple model with two Dense.
 - [ ] Add hyperparameter for ppo
 - [ ] Add hyperparameter for trpo
 - [ ] Add description result
-- [ ] Increase model factory
