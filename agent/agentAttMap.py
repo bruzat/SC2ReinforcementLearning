@@ -10,7 +10,7 @@ class AgentAttMap(base_agent.BaseAgent):
 	"""
 
 	def __init__(self,  path='logger/', model_name='model', model=None, load_model=False, method_name="method", method=None):
-		super(AgentFindAndDefeatZerglings, self).__init__()
+		super(AgentAttMap, self).__init__()
 		self.logger = log.Logger()
 		self.model_name = model_name
 		self.method_name = method_name
@@ -47,7 +47,7 @@ class AgentAttMap(base_agent.BaseAgent):
 		elif reward == 0:
 			reward = -1
 
-		feat = AgentFindAndDefeatZerglings.get_feature_screen(obs)
+		feat = AgentAttMap.get_feature_screen(obs)
 		# Store the reward
 		self.method.store(feat, action, reward)
 		# Increase the current step
@@ -81,17 +81,17 @@ class AgentAttMap(base_agent.BaseAgent):
 	def step(self, obs):
 		# step function gets called automatically by pysc2 environment
 		# call the parent class to have pysc2 setup rewards/etc for u
-		super(AgentFindAndDefeatZerglings, self).step(obs)
+		super(AgentAttMap, self).step(obs)
 		# if we can move our army (we have something selected)
 		# Get the features of the screen
-		feat = AgentFindAndDefeatZerglings.get_feature_screen(obs)
+		feat = AgentAttMap.get_feature_screen(obs)
     	# Step with ppo according to this state
 		act = self.method.get_action(feat)
 
 		if act[0] == 0:
 			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
 				# Convert the prediction into positions
-				position = AgentFindAndDefeatZerglings.prediction_to_position([act[1]])
+				position = AgentAttMap.prediction_to_position([act[1]])
 				# Get a random location on the map
 				return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], position[0]]) , act
 			else:
@@ -99,7 +99,7 @@ class AgentAttMap(base_agent.BaseAgent):
 		elif act[0] == 1:
 			if actions.FUNCTIONS.Attack_screen.id in obs.observation['available_actions']:
 				# Convert the prediction into positions
-				position = AgentFindAndDefeatZerglings.prediction_to_position([act[1]])
+				position = AgentAttMap.prediction_to_position([act[1]])
 				# Get a random location on the map
 				return actions.FunctionCall(actions.FUNCTIONS.Attack_screen.id, [[0], position[0]]) , act
 			else:
@@ -107,7 +107,7 @@ class AgentAttMap(base_agent.BaseAgent):
 		elif act[0] == 2:
 			if actions.FUNCTIONS.move_camera.id in obs.observation['available_actions']:
 				# Convert the prediction into positions
-				position = AgentFindAndDefeatZerglings.prediction_to_position([act[2]])
+				position = AgentAttMap.prediction_to_position([act[2]])
 				# Get a random location on the map
 				return actions.FunctionCall(actions.FUNCTIONS.move_camera.id, [position[0]]) , act
 			else:
