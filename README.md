@@ -11,6 +11,7 @@ On MoveToBeacon with policy gradient and simple model with two Dense.
 On CollectMineralShards with proximal policy optimization and convolution and selected_units.
 ![CollectMineralShards.gif](https://github.com/bruzat/SC2ReinforcementLearning/blob/master/result/CollectMineralShards/simpleConvCollectMineralShardsSmall.gif)
 
+<img src="https://github.com/bruzat/SC2ReinforcementLearning/blob/master/result/CollectMineralShards/Model.PNG" width="150" height="150"><img src="https://github.com/bruzat/SC2ReinforcementLearning/blob/master/result/CollectMineralShards/TrainResult.PNG" width="300" height="150">
 
 # TODO
 - [ ] Add autofit observation lenght
