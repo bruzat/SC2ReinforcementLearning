@@ -4,7 +4,7 @@ import numpy as np
 
 import agent.log as log
 
-class AgentFindAndDefeatZerglings(base_agent.BaseAgent):
+class AgentAttMap(base_agent.BaseAgent):
 	"""
 		An agent for doing a simple movement form one point to another.
 	"""
@@ -26,7 +26,7 @@ class AgentFindAndDefeatZerglings(base_agent.BaseAgent):
 			model = model,
         	input_dim=[(5,64,64),(4,64,64),(3,7)],
         	output_dim=[3,64*64,64*64],
-        	pi_lr=0.0001,
+        	pi_lr=0.00001,
         	gamma=0.98,
         	buffer_size=2056
 		)
@@ -87,7 +87,7 @@ class AgentFindAndDefeatZerglings(base_agent.BaseAgent):
 		feat = AgentFindAndDefeatZerglings.get_feature_screen(obs)
     	# Step with ppo according to this state
 		act = self.method.get_action(feat)
-	
+
 		if act[0] == 0:
 			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
 				# Convert the prediction into positions

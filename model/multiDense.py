@@ -14,14 +14,21 @@ class MultiDense(simpleModel.SimpleModel):
 
         if len(list_input_dim) > 1:
             X_inputs = []
+            X_pre_out = []
             for input_dim in list_input_dim:
-                X_inputs.append(layers.Input(shape=input_dim))
-            net = layers.Concatenate()(X_inputs)
+                x = layers.Input(shape=input_dim)
+                X_inputs.append(x)
+                xt = x
+                xt = layers.Flatten()(xt)
+                xt = layers.Dense(256)(xt)
+                X_pre_out.append(xt)
+            net = layers.Concatenate()(X_pre_out)
         else:
             X_input = layers.Input(shape=list_input_dim[0])
-            net = X_input
-
-        net = layers.Flatten()(net)
+            xt = X_input
+            xt = layers.Flatten()(xt)
+            xt = layers.Dense(256)(xt)
+            net = xt
 
         net = layers.Dense(256)(net)
         net = layers.Activation("relu")(net)

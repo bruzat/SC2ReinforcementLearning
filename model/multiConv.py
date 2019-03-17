@@ -34,7 +34,7 @@ class MultiConv(simpleModel.SimpleModel):
         else:
             X_input = layers.Input(shape=list_input_dim[0])
             xt = X_input
-            if(len(x.shape) == 4):
+            if(len(xt.shape) == 4):
                 xt = layers.Conv2D(32, (3, 3), padding="same", activation="relu")(xt)
             xt = layers.Flatten()(xt)
             xt = layers.Dense(256)(xt)

@@ -1,5 +1,5 @@
 from tensorflow import keras as k
-from agent import agentSelectedUnits, agentSimple, agentFindAndDefeatZerglings
+from agent import agentSelectedUnits, agentSimple, agentAttMap
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
 from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
 
@@ -28,7 +28,7 @@ dict_map = {'MoveToBeacon': 'MoveToBeacon',
 
 dict_agent = {'simple': agentSimple.AgentSimple,
 			'selectedUnits': agentSelectedUnits.AgentSelectedUnits,
-			'FindAndDefeatZerglings': agentFindAndDefeatZerglings.AgentFindAndDefeatZerglings}
+			'attMap': agentAttMap.AgentAttMap}
 
 def main(_):
 	parser = argparse.ArgumentParser()
