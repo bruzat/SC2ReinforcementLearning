@@ -1,9 +1,9 @@
 from tensorflow.keras import layers
 from tensorflow.keras.models import Model
 
-import model.simpleModel as simpleModel
+import model.baseModel as baseModel
 
-class MultiDense(simpleModel.SimpleModel):
+class MultiDense(baseModel.BaseModel):
 
     def __init__(self):
         super().__init__()

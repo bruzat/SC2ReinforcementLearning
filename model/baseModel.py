@@ -2,7 +2,7 @@ from tensorflow.keras import models
 
 import os
 
-class SimpleModel(object):
+class BaseModel(object):
 
     def __init__(self):
         super().__init__()

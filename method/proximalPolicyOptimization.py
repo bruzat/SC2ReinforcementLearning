@@ -4,10 +4,10 @@ from tensorflow.keras import optimizers
 from tensorflow.keras import utils as np_utils
 from tensorflow.keras import losses
 
-from method import simpleMethod
+from method import baseMethod
 import os
 
-class ProximalPolicyOptimization(simpleMethod.SimpleMethod):
+class ProximalPolicyOptimization(baseMethod.BaseMethod):
     """
         Implementation of Proximal Policy Optimization
         This Implementation handle only continous values

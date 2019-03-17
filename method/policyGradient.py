@@ -3,12 +3,12 @@ from tensorflow.keras import backend as K
 from tensorflow.keras import optimizers
 from tensorflow.keras import utils as np_utils
 
-from method import simpleMethod
+from method import baseMethod
 
 from absl import app
 import os
 
-class PolicyGradient(simpleMethod.SimpleMethod):
+class PolicyGradient(baseMethod.BaseMethod):
     """
         Implementation of Policy Gradient
         This Implementation handle only continous values

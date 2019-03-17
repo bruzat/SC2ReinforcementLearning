@@ -90,7 +90,7 @@ class Buffer:
         return self.obs_buf, self.act_buf, self.rew_buf, self.adv_buf
 
 
-class SimpleMethod(object):
+class BaseMethod(object):
     def __init__(self, input_dim, output_dim, pi_lr, gamma, buffer_size):
         super().__init__()
         # Stored the spaces

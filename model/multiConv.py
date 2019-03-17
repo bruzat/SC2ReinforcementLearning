@@ -3,13 +3,13 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Lambda
 from tensorflow.keras import backend as K
 
-import model.simpleModel as simpleModel
+import model.baseModel as baseModel
 
 def expand_dims(x):
     return K.expand_dims(x, 1)
 
 
-class MultiConv(simpleModel.SimpleModel):
+class MultiConv(baseModel.BaseModel):
 
     def __init__(self):
         super().__init__()
