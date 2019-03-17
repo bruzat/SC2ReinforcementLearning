@@ -9,7 +9,7 @@ def expand_dims(x):
     return K.expand_dims(x, 1)
 
 
-class SimpleConv(baseModel.SaseModel):
+class SimpleConv(baseModel.BaseModel):
 
     def __init__(self):
         super().__init__()
