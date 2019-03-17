@@ -1,5 +1,5 @@
 from tensorflow import keras as k
-from agent import agentSelectedUnits, agentSimple, agentAttMap
+from agent import agentSelectedUnits, agentSimple, agentAttMap, agentSelectAtt
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
 from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
 
@@ -24,11 +24,13 @@ dict_method = { 'pg': policyGradient.PolicyGradient,
 
 dict_map = {'MoveToBeacon': 'MoveToBeacon',
 			'CollectMineralShards': 'CollectMineralShards',
-			'FindAndDefeatZerglings': 'FindAndDefeatZerglings'}
+			'FindAndDefeatZerglings': 'FindAndDefeatZerglings',
+			'DefeatRoaches': 'DefeatRoaches'}
 
 dict_agent = {'simple': agentSimple.AgentSimple,
 			'selectedUnits': agentSelectedUnits.AgentSelectedUnits,
-			'attMap': agentAttMap.AgentAttMap}
+			'attMap': agentAttMap.AgentAttMap,
+			'selectAtt': agentSelectAtt.AgentSelectAtt}
 
 def main(_):
 	parser = argparse.ArgumentParser()
