@@ -41,6 +41,7 @@ def main(_):
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	parser.add_argument('--logger_path', type=str, default='./logger', help='path to save log')
+	parser.add_argument('--step_mul', type=int, default=8, help='step_mul for pysc2 env')
 	args, unknown_flags = parser.parse_known_args()
 
 	model_name = args.model
@@ -52,6 +53,7 @@ def main(_):
 	logger_path = args.logger_path
 	map_name = args.map
 	agent_name = args.agent
+	step_mul = args.step_mul
 
 	if map_name in dict_map:
 		map = dict_map[map_name]
@@ -82,7 +84,6 @@ def main(_):
 	print("method is : " + str(method))
 
 
-	step_mul = 8 if model_name is None else 8
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
@@ -129,6 +130,7 @@ if __name__ == '__main__':
 	parser.add_argument('--no_training', action='store_false', default=True, help="if it is training")
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	parser.add_argument('--logger_path', type=str, default='./logger', help='path to save log')
+	parser.add_argument('--step_mul', type=int, default=8, help='step_mul for pysc2 env')
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
 	app.run(main, argv=sys.argv[:1] + unknown_flags)
