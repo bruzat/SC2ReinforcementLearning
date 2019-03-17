@@ -43,7 +43,7 @@ class AgentAttMap(base_agent.BaseAgent):
 		# Train the agent
 		self.score += reward
 		if reward == -1:
-			reward = -20
+			reward = -50
 		elif reward == 0:
 			reward = -1
 
