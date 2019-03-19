@@ -15,7 +15,7 @@ class AgentSimple(base_agent.BaseAgent):
 		self.model_name = model_name
 		self.method_name = method_name
 		self.nb_steps = 0
-		self.max_steps = 512
+		self.max_steps = 1024
 		self.epoch = 0
 		self.path = path
 		self.score = 0
@@ -26,9 +26,9 @@ class AgentSimple(base_agent.BaseAgent):
 			model = model,
         	input_dim=[(64,64)],
         	output_dim=[64*64],
-        	pi_lr=0.0001,
+        	pi_lr=0.001,
         	gamma=0.98,
-        	buffer_size=512
+        	buffer_size=1024
 		)
 
 

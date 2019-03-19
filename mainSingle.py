@@ -25,7 +25,8 @@ dict_method = { 'pg': policyGradient.PolicyGradient,
 dict_map = {'MoveToBeacon': 'MoveToBeacon',
 			'CollectMineralShards': 'CollectMineralShards',
 			'FindAndDefeatZerglings': 'FindAndDefeatZerglings',
-			'DefeatRoaches': 'DefeatRoaches'}
+			'DefeatRoaches': 'DefeatRoaches',
+			'DefeatZerglingsAndBanelings': 'DefeatZerglingsAndBanelings'}
 
 dict_agent = {'simple': agentSimple.AgentSimple,
 			'selectedUnits': agentSelectedUnits.AgentSelectedUnits,
