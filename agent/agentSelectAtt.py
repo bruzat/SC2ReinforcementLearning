@@ -43,7 +43,7 @@ class AgentSelectAtt(base_agent.BaseAgent):
 		# Train the agent
 		self.score += reward
 		if reward == -1:
-			reward = -5
+			reward = -20
 		elif reward == 0:
 			reward = -1
 
