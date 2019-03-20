@@ -1,5 +1,5 @@
 from method import trustRegionPolicyOptimization, policyGradient, proximalPolicyOptimization
-from model import simpleDense, simpleDenseMulti
+from model import simpleDense
 from absl import app
 
 import numpy as np

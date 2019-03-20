@@ -8,8 +8,8 @@ class SimpleDense(baseModel.BaseModel):
     def __init__(self):
         super().__init__()
 
-    def compile(self,list_input_dim, list_output_dim):
-        super().compile(list_input_dim, list_output_dim)
+    def make(self,list_input_dim, list_output_dim):
+        super().make(list_input_dim, list_output_dim)
         """Create a base network"""
 
         if len(list_input_dim) > 1:

@@ -4,6 +4,8 @@ from tensorflow.keras import optimizers
 from tensorflow.keras import utils as np_utils
 from tensorflow.keras import losses
 
+from tensorflow.keras.optimizers import Adam
+
 from method import baseMethod
 import os
 
@@ -16,7 +18,11 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size)
 
         self.model = model
-        self.model.compile(self.input_dim, self.output_dim)
+        self.model.make(self.input_dim, self.output_dim)
+        self.critic = model.__class__()
+        self.critic.make(self.input_dim, [1])
+        self.critic.compile(optimizer=Adam(lr=self.pi_lr), loss='mse')
+
         self.__build_train_fn()
 
     def train(self):
@@ -24,12 +30,23 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         loss = []
         entropy = []
         old_mu = self.get_actions_values(obs)
+
+        pred_values = self.critic_predict(obs)
+
+        adv_new = np.subtract(adv,pred_values)
+
         for step in range(5):
-            result = self.train_fn([ *obs, *old_mu, *act, adv])
+            result = self.train_fn([ *obs, *old_mu, *act, adv_new])
+            self.critic.model.fit(obs, [pred_values], verbose=0)
             loss.append(result[0])
             entropy.append(result[1])
 
         return [np.mean(loss),np.mean(entropy),np.mean(rew)]
+
+    def critic_predict(self, obs):
+        pred = self.critic.predict(obs)
+        return [i[0] for i in pred]
+
 
     def __build_train_fn(self):
         """Create a train function

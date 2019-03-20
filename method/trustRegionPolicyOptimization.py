@@ -16,7 +16,7 @@ class TrustRegionPolicyOptimization(baseMethod.BaseMethod):
         super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size)
 
         self.model = model
-        self.model.compile(self.input_dim, self.output_dim)
+        self.model.make(self.input_dim, self.output_dim)
         self.__build_train_fn()
 
     def train(self):

@@ -10,7 +10,7 @@ class BaseModel(object):
         self.input_dim = None
         self.output_dim = None
 
-    def compile(self,input_dim, output_dim):
+    def make(self,input_dim, output_dim):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.model = None
@@ -36,6 +36,9 @@ class BaseModel(object):
 
     def duplicate_model(self):
         model = self.__class__()
-        model.compile(self.input_dim,self.output_dim)
+        model.make(self.input_dim,self.output_dim)
         model.copy(self)
         return model
+
+    def compile(self,optimizer,loss):
+        self.model.compile(optimizer=optimizer, loss=loss)
