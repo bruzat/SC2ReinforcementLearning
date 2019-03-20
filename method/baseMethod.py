@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import signal
+from abc import abstractmethod
 
 import os
 
@@ -136,5 +137,6 @@ class BaseMethod(object):
         else:
             return [np.squeeze(self.model.predict(states))]
 
+    @abstractmethod
     def __build_train_fn(self):
         pass

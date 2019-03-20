@@ -45,6 +45,9 @@ def main(_):
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	parser.add_argument('--logger_path', type=str, default='./logger', help='path to save log')
 	parser.add_argument('--step_mul', type=int, default=8, help='step_mul for pysc2 env')
+	parser.add_argument('--lr', type=int, default=0.001, help='learning rate for model')
+	parser.add_argument('--gamma', type=int, default=0.98, help='gamma for advantage calcul')
+	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
 	args, unknown_flags = parser.parse_known_args()
 
 	model_name = args.model
@@ -57,6 +60,9 @@ def main(_):
 	map_name = args.map
 	agent_name = args.agent
 	step_mul = args.step_mul
+	lr = args.lr
+	gamma = args.gamma
+	buffer_size = args.buffer_size
 
 	if map_name in dict_map:
 		map = dict_map[map_name]
@@ -86,11 +92,14 @@ def main(_):
 		method = dict_method['pg']
 	print("method is : " + str(method))
 
+	print("lr is : "+str(lr))
+	print("gamma is : " +str(gamma))
+	print("bugger size is : " +str(buffer_size))
 
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
-	 				method_name=method_name, method = method)
+	 				method_name=method_name, method = method, pi_lr=lr, gamma=gamma, buffer_size=buffer_size)
 
 	try:
 		with sc2_env.SC2Env(map_name=map, players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
@@ -134,6 +143,9 @@ if __name__ == '__main__':
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	parser.add_argument('--logger_path', type=str, default='./logger', help='path to save log')
 	parser.add_argument('--step_mul', type=int, default=8, help='step_mul for pysc2 env')
+	parser.add_argument('--lr', type=int, default=0.001, help='learning rate for model')
+	parser.add_argument('--gamma', type=int, default=0.98, help='gamma for advantage calcul')
+	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
 	app.run(main, argv=sys.argv[:1] + unknown_flags)
