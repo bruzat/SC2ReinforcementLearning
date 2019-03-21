@@ -104,13 +104,13 @@ class BaseMethod(object):
         self.model = None
 
     def save(self,path,method,model, it):
-        writepath=path+'/'+method+'/'+model+'/'+model+str(it)+'.h5'
+        writepath=path+'/'+method+'/'+model+'/actor/'+model+str(it)+'.h5'
         self.model.save(writepath)
 
     def load(self,path,method, model):
-        saves = [int(x[len(model):-3]) for x in os.listdir(path+'/'+method+'/'+model) if model in x and len(x) > len(model)]
+        saves = [int(x[len(model):-3]) for x in os.listdir(path+'/'+method+'/'+model+'/actor') if model in x and len(x) > len(model)]
         it = '%d' % max(saves)
-        writepath= path+'/'+method+'/'+str(model)+'/'+str(model)+str(it)+'.h5'
+        writepath= path+'/'+method+'/'+str(model)+'/actor/'+str(model)+str(it)+'.h5'
         self.model.load(writepath)
         self.__build_train_fn()
         return int(it)
