@@ -92,7 +92,7 @@ class Buffer:
 
 
 class BaseMethod(object):
-    def __init__(self, input_dim, output_dim, pi_lr, gamma, buffer_size):
+    def __init__(self, input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta ):
         super().__init__()
         # Stored the spaces
         self.input_dim = input_dim
@@ -101,6 +101,10 @@ class BaseMethod(object):
         self.buffer = Buffer(self.input_dim,self.output_dim,buffer_size,gamma)
         # Learning rate of the policy network
         self.pi_lr = pi_lr
+        self.gamma = gamma
+        self.buffer_size = buffer_size
+        self.clipping_range = clipping_range
+        self.beta = beta
         self.model = None
 
     def save(self,path,method,model, it):

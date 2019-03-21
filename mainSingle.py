@@ -55,6 +55,8 @@ def main(_):
 	parser.add_argument('--lr', type=float, choices=[Range(0.0, 1.0)], default=0.001, help='learning rate for model Range(0.0, 1.0)')
 	parser.add_argument('--gamma', type=float, choices=[Range(0.0, 1.0)], default=0.98, help='gamma for advantage calcul Range(0.0, 1.0)')
 	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
+	parser.add_argument('--clipping_range', type=float, choices=[Range(0.0, 1.0)], default=0.2, help='clipping_range for model Range(0.0, 1.0) only for ppo')
+	parser.add_argument('--beta', type=float, default=1e-3, help='beta for advantage calcul only for ppo')
 	args, unknown_flags = parser.parse_known_args()
 
 	model_name = args.model
@@ -70,6 +72,8 @@ def main(_):
 	lr = args.lr
 	gamma = args.gamma
 	buffer_size = args.buffer_size
+	clipping_range = args.clipping_range
+	beta = args.beta
 
 	if map_name in dict_map:
 		map = dict_map[map_name]
@@ -102,11 +106,14 @@ def main(_):
 	print("lr is : "+str(lr))
 	print("gamma is : " +str(gamma))
 	print("bugger size is : " +str(buffer_size))
+	print("clipping_range is : " +str(clipping_range))
+	print("beta size is : " +str(beta))
 
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
-	 				method_name=method_name, method = method, pi_lr=lr, gamma=gamma, buffer_size=buffer_size)
+	 				method_name=method_name, method = method, pi_lr=lr, gamma=gamma, buffer_size=buffer_size,
+					clipping_range=clipping_range, beta=beta)
 
 	try:
 		with sc2_env.SC2Env(map_name=map, players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
@@ -153,6 +160,8 @@ if __name__ == '__main__':
 	parser.add_argument('--lr', type=float, choices=[Range(0.0, 1.0)], default=0.001, help='learning rate for model Range(0.0, 1.0)')
 	parser.add_argument('--gamma', type=float, choices=[Range(0.0, 1.0)], default=0.98, help='gamma for advantage calcul Range(0.0, 1.0)')
 	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
+	parser.add_argument('--clipping_range', type=float, choices=[Range(0.0, 1.0)], default=0.2, help='clipping_range for model Range(0.0, 1.0) only for ppo')
+	parser.add_argument('--beta', type=float, default=1e-3, help='beta for advantage calcul only for ppo')
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
 	app.run(main, argv=sys.argv[:1] + unknown_flags)

@@ -9,8 +9,8 @@ class AgentAttMap(baseAgent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, pi_lr=0.001, gamma=0.98, buffer_size=1024):
-		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size)
+	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-1):
+		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
 
         # Create the NET class
 		self.method = method(
@@ -19,7 +19,9 @@ class AgentAttMap(baseAgent.BaseAgent):
         	output_dim=[3,64*64,64*64],
         	pi_lr=pi_lr,
         	gamma=gamma,
-        	buffer_size=buffer_size
+        	buffer_size=buffer_size,
+			clipping_range = clipping_range,
+			beta = beta
 		)
 
 

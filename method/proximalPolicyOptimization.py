@@ -14,8 +14,8 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         Implementation of Proximal Policy Optimization
         This Implementation handle only continous values
     """
-    def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size):
-        super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size)
+    def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta ):
+        super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta)
 
         self.model = model
         self.model.make(self.input_dim, self.output_dim)
@@ -47,9 +47,7 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         loss = []
         entropy = []
         old_mu = self.get_actions_values(obs)
-
         pred_values = self.critic_predict(obs)
-
         adv_new = np.subtract(adv,pred_values)
 
         for step in range(5):
@@ -98,8 +96,8 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
 
             r = act_prob/(act_prob_old + 1e-10)
 
-            l = K.minimum(r * advantage_placeholder, K.clip(r, min_value=0.8, max_value=1.2) * advantage_placeholder)
-            l = l + 1e-3 * (act_prob * K.log(act_prob + 1e-10))
+            l = K.minimum(r * advantage_placeholder, K.clip(r, min_value=1-self.clipping_range, max_value=1+self.clipping_range) * advantage_placeholder)
+            l = l + self.beta * (act_prob * K.log(act_prob + 1e-10))
             loss.append(-K.mean(l))
 
         entropy = K.sum(action_prob_old)

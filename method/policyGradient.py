@@ -13,8 +13,8 @@ class PolicyGradient(baseMethod.BaseMethod):
         Implementation of Policy Gradient
         This Implementation handle only continous values
     """
-    def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size):
-        super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size)
+    def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta ):
+        super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta)
 
         self.model = model
         self.model.make(self.input_dim, self.output_dim)
