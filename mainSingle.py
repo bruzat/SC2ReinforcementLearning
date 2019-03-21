@@ -33,6 +33,13 @@ dict_agent = {'simple': agentSimple.AgentSimple,
 			'attMap': agentAttMap.AgentAttMap,
 			'selectAtt': agentSelectAtt.AgentSelectAtt}
 
+class Range(object):
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+    def __eq__(self, other):
+        return self.start <= other <= self.end
+
 def main(_):
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--map', type=str, default='MoveToBeacon', help='Name of map')
@@ -45,8 +52,8 @@ def main(_):
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	parser.add_argument('--logger_path', type=str, default='./logger', help='path to save log')
 	parser.add_argument('--step_mul', type=int, default=8, help='step_mul for pysc2 env')
-	parser.add_argument('--lr', type=int, default=0.001, help='learning rate for model')
-	parser.add_argument('--gamma', type=int, default=0.98, help='gamma for advantage calcul')
+	parser.add_argument('--lr', type=float, choices=[Range(0.0, 1.0)], default=0.001, help='learning rate for model Range(0.0, 1.0)')
+	parser.add_argument('--gamma', type=float, choices=[Range(0.0, 1.0)], default=0.98, help='gamma for advantage calcul Range(0.0, 1.0)')
 	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
 	args, unknown_flags = parser.parse_known_args()
 
@@ -143,8 +150,8 @@ if __name__ == '__main__':
 	parser.add_argument('--visualize', type=bool, help="show the agent")
 	parser.add_argument('--logger_path', type=str, default='./logger', help='path to save log')
 	parser.add_argument('--step_mul', type=int, default=8, help='step_mul for pysc2 env')
-	parser.add_argument('--lr', type=int, default=0.001, help='learning rate for model')
-	parser.add_argument('--gamma', type=int, default=0.98, help='gamma for advantage calcul')
+	parser.add_argument('--lr', type=float, choices=[Range(0.0, 1.0)], default=0.001, help='learning rate for model Range(0.0, 1.0)')
+	parser.add_argument('--gamma', type=float, choices=[Range(0.0, 1.0)], default=0.98, help='gamma for advantage calcul Range(0.0, 1.0)')
 	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
