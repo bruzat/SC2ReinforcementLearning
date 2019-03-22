@@ -15,7 +15,7 @@ class AgentSelectAtt(baseAgent.BaseAgent):
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=[(4,64,64),(9,7)],
+        	input_dim=[(5,64,64),(9,7)],
         	output_dim=[3,64*64,64*64],
         	pi_lr=pi_lr,
         	gamma=gamma,
