@@ -9,8 +9,8 @@ class AgentSelectAtt(baseAgent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-1):
-		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
+	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, coef_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-3):
+		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, coef_null=0, coef_neg=1, coef_pos=1, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
 
         # Create the NET class
 		self.method = method(
@@ -35,10 +35,12 @@ class AgentSelectAtt(baseAgent.BaseAgent):
 	def train(self, obs_new, obs, action, reward):
 		# Train the agent
 		self.score += reward
-		if reward == -1:
-			reward = -20
+		if reward < 0:
+			reward = reward * self.coef_neg
 		elif reward == 0:
-			reward = -1
+			reward = self.coef_null
+		else:
+			reward = reward * self.coef_pos
 
 		feat = AgentSelectAtt.get_feature_screen(obs)
 		# Store the reward

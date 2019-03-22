@@ -35,11 +35,8 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         saves = [int(x[len(model):-3]) for x in os.listdir(path+'/'+method+'/'+model+'/critic') if model in x and len(x) > len(model)]
         it = '%d' % max(saves)
         writepath= path+'/'+method+'/'+str(model)+'/critic/'+str(model)+str(it)+'.h5'
-        try:
-            self.critic.load(writepath)
-            self.critic.compile(optimizer=Adam(lr=self.pi_lr), loss='mse')
-        except :
-            pass
+        self.critic.load(writepath)
+        self.critic.compile(optimizer=Adam(lr=self.pi_lr), loss='mse')
         return int(it)
 
     def train(self):

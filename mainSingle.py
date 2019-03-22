@@ -57,6 +57,9 @@ def main(_):
 	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
 	parser.add_argument('--clipping_range', type=float, choices=[Range(0.0, 1.0)], default=0.2, help='clipping_range for model Range(0.0, 1.0) only for ppo')
 	parser.add_argument('--beta', type=float, default=1e-3, help='beta for advantage calcul only for ppo')
+	parser.add_argument('--coef_neg', type=int,default=1, help='coef mult for negatif reward')
+	parser.add_argument('--coef_pos', type=int,default=1, help='coef mult for positif reward')
+	parser.add_argument('--coef_null', type=int,default=1, help='reward for null value')
 	args, unknown_flags = parser.parse_known_args()
 
 	model_name = args.model
@@ -74,6 +77,9 @@ def main(_):
 	buffer_size = args.buffer_size
 	clipping_range = args.clipping_range
 	beta = args.beta
+	coef_neg = args.coef_neg
+	coef_pos = args.coef_pos
+	coef_null = args.coef_null
 
 	if map_name in dict_map:
 		map = dict_map[map_name]
@@ -108,12 +114,15 @@ def main(_):
 	print("bugger size is : " +str(buffer_size))
 	print("clipping_range is : " +str(clipping_range))
 	print("beta size is : " +str(beta))
+	print("coef_neg size is : " +str(coef_neg))
+	print("coef_pos size is : " +str(coef_pos))
+	print("coef_null size is : " +str(coef_null))
 
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
 	 				method_name=method_name, method = method, pi_lr=lr, gamma=gamma, buffer_size=buffer_size,
-					clipping_range=clipping_range, beta=beta)
+					clipping_range=clipping_range, beta=beta, coef_neg=coef_neg, coef_pos=coef_pos, coef_null=coef_null)
 
 	try:
 		with sc2_env.SC2Env(map_name=map, players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
@@ -162,6 +171,10 @@ if __name__ == '__main__':
 	parser.add_argument('--buffer_size', type=int, default=1024, help='buffer size ofr buffer')
 	parser.add_argument('--clipping_range', type=float, choices=[Range(0.0, 1.0)], default=0.2, help='clipping_range for model Range(0.0, 1.0) only for ppo')
 	parser.add_argument('--beta', type=float, default=1e-3, help='beta for advantage calcul only for ppo')
+	parser.add_argument('--coef_neg', type=int,default=1, help='coef mult for negatif reward')
+	parser.add_argument('--coef_pos', type=int,default=1, help='coef mult for positif reward')
+	parser.add_argument('--coef_null', type=int,default=1, help='reward for null value')
+
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)
 	app.run(main, argv=sys.argv[:1] + unknown_flags)
