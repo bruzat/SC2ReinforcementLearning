@@ -113,6 +113,7 @@ class AgentSelectAtt(baseAgent.BaseAgent):
 		mapp.append(obs.observation.feature_screen[features.SCREEN_FEATURES.unit_hit_points.index])
 		mapp.append(obs.observation.feature_screen[features.SCREEN_FEATURES.selected.index])
 		mapp.append(obs.observation.feature_screen[features.SCREEN_FEATURES.unit_density.index])
+		mapp.append(obs.observation.feature_screen[features.SCREEN_FEATURES.unit_type.index])
 
 		multi_select = np.zeros((9,7))
 		obs_mult = obs.observation["multi_select"]
