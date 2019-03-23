@@ -27,15 +27,15 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
 
     def save(self,path,method,model, it):
         super().save(path,method,model,it)
-        writepath=path+'/'+method+'/'+model+'/critic/'+model+str(it)+'.h5'
-        self.critic.save(writepath)
+        path=path+'/'+method+'/'+model+'/critic/'+model+str(it)
+        ProximalPolicyOptimization.save_model(self.critic, path)
 
     def load(self,path,method, model):
         super().load(path, method, model)
         saves = [int(x[len(model):-3]) for x in os.listdir(path+'/'+method+'/'+model+'/critic') if model in x and len(x) > len(model)]
         it = '%d' % max(saves)
-        writepath= path+'/'+method+'/'+str(model)+'/critic/'+str(model)+str(it)+'.h5'
-        self.critic.load(writepath)
+        path= path+'/'+method+'/'+str(model)+'/critic/'+str(model)+str(it)
+        self.critic = ProximalPolicyOptimization.load_model(path)
         self.critic.compile(optimizer=Adam(lr=self.pi_lr), loss='mse')
         return int(it)
 

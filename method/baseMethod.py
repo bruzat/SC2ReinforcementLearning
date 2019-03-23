@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import signal
 from abc import abstractmethod
+from tensorflow.keras.models import model_from_json
 
 import os
 
@@ -107,15 +108,31 @@ class BaseMethod(object):
         self.beta = beta
         self.model = None
 
+    def save_model(model, path):
+        model_json = model.to_json()
+        mode = 'a' if os.path.exists(path+".json") else 'w'
+        with open(writepath_json, model) as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        model.save_weights(path+".h5")
+
+    def load_model(path):
+        json_file = open(path+'.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+        model.load_weights(path+'.h5")
+        return model
+
     def save(self,path,method,model, it):
-        writepath=path+'/'+method+'/'+model+'/actor/'+model+str(it)+'.h5'
-        self.model.save(writepath)
+        path=path+'/'+method+'/'+model+'/actor/'+model+str(it)
+        BaseMethod.save_model(self.model,path)
 
     def load(self,path,method, model):
         saves = [int(x[len(model):-3]) for x in os.listdir(path+'/'+method+'/'+model+'/actor') if model in x and len(x) > len(model)]
         it = '%d' % max(saves)
-        writepath= path+'/'+method+'/'+str(model)+'/actor/'+str(model)+str(it)+'.h5'
-        self.model.load(writepath)
+        path = path+'/'+method+'/'+str(model)+'/actor/'+str(model)+str(it)
+        self.model = BaseMethod.load_model(path)
         self.__build_train_fn()
         return int(it)
 
