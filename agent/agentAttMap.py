@@ -1,6 +1,7 @@
 from agent import baseAgent
 from pysc2.lib import actions, features
 import numpy as np
+import os
 
 import agent.log as log
 
@@ -9,8 +10,8 @@ class AgentAttMap(baseAgent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, coef_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-3):
-		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, coef_null=0, coef_neg=1, coef_pos=1, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
+	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-3):
+		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, val_null=val_null, coef_neg=coef_neg, coef_pos=coef_pos, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
 
         # Create the NET class
 		self.method = method(
@@ -28,7 +29,11 @@ class AgentAttMap(baseAgent.BaseAgent):
 		# Load the model
 		if load_model:
             #Load the existing model
-			self.epoch = self.method.load(self.path, self.method_name, self.model_name)
+			saves = [int(x[len(self.model_name):x.find(".")] )for x in os.listdir(self.path+'/'+self.method_name+'/'+self.model_name+'/actor/') if self.model_name in x[:x.find(".")] and len(x[:x.find(".")]) > len(self.model_name)]
+			self.epoch = max(saves)
+			path = self.path+'/'+self.method_name+'/'+self.model_name+'/'
+			name = self.model_name+str(self.epoch)
+			self.method.load(path, name)
 
 		self.logger.drawModel(self.method.model.model, self.path, self.method_name, self.model_name)
 
@@ -38,7 +43,7 @@ class AgentAttMap(baseAgent.BaseAgent):
 		if reward < 0:
 			reward = reward * self.coef_neg
 		elif reward == 0:
-			reward = self.coef_null
+			reward = self.val_null
 		else:
 			reward = reward * self.coef_pos
 
@@ -71,7 +76,9 @@ class AgentAttMap(baseAgent.BaseAgent):
 			self.epoch += 1
 			# Save every 100 epochs
 			if (self.epoch-1) % 50 == 0:
-				self.method.save(self.path,self.method_name,self.model_name,self.epoch)
+				path= self.path+'/'+self.method_name+'/'+self.model_name+'/'
+				name= self.model_name+str(self.epoch)
+				self.method.save(path, name)
 
 	def step(self, obs):
 		# step function gets called automatically by pysc2 environment

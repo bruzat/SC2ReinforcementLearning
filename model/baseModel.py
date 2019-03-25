@@ -1,4 +1,5 @@
 from tensorflow.keras import models
+from tensorflow.keras.models import model_from_json
 
 import os
 
@@ -9,19 +10,28 @@ class BaseModel(object):
         self.model = None
         self.input_dim = None
         self.output_dim = None
+        self.activation = None
 
-    def make(self,input_dim, output_dim):
+    def make(self, input_dim, output_dim, activation=None):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.model = None
+        self.activation = activation
 
-    def save(self,writepath):
-        os.makedirs(os.path.dirname(writepath), exist_ok=True)
-        self.model.save(writepath)
+    def save_model(self, path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        model_json = self.model.to_json()
+        with open(path+".json", "w+") as json_file:
+            json_file.write(model_json)
+        # serialize weights to HDF5
+        self.model.save_weights(path+".h5")
 
-    def load(self,writepath):
-        self.model = models.load_model(writepath)
-        self.self_value()
+    def load_model(self, path):
+        json_file = open(path+".json", 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.model = model_from_json(loaded_model_json)
+        self.model.load_weights(path+".h5")
 
     def predict(self,env):
         return self.model.predict(env)

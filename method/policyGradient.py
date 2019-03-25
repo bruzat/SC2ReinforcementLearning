@@ -6,8 +6,6 @@ from tensorflow.keras import utils as np_utils
 from method import baseMethod
 
 from absl import app
-import os
-
 class PolicyGradient(baseMethod.BaseMethod):
     """
         Implementation of Policy Gradient
@@ -17,7 +15,7 @@ class PolicyGradient(baseMethod.BaseMethod):
         super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta)
 
         self.model = model
-        self.model.make(self.input_dim, self.output_dim)
+        self.model.make(self.input_dim, self.output_dim, "softmax")
         self.__build_train_fn()
 
     def train(self):

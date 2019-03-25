@@ -7,7 +7,6 @@ from tensorflow.keras import losses
 from tensorflow.keras.optimizers import Adam
 
 from method import baseMethod
-import os
 
 class ProximalPolicyOptimization(baseMethod.BaseMethod):
     """
@@ -18,24 +17,22 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta)
 
         self.model = model
-        self.model.make(self.input_dim, self.output_dim)
+        self.model.make(self.input_dim, self.output_dim, "softmax")
         self.critic = model.__class__()
-        self.critic.make(self.input_dim, [1])
+        self.critic.make(self.input_dim, [1], None)
         self.critic.compile(optimizer=Adam(lr=self.pi_lr), loss='mse')
 
         self.__build_train_fn()
 
-    def save(self,path,method,model, it):
-        super().save(path,method,model,it)
-        path=path+'/'+method+'/'+model+'/critic/'+model+str(it)
-        ProximalPolicyOptimization.save_model(self.critic, path)
+    def save(self,path, name):
+        super().save(path, name)
+        return
+        path=path+'/'+method+'/'+model+'/'+model+str(it)
+        self.critic.save_model(path)
 
-    def load(self,path,method, model):
-        super().load(path, method, model)
-        saves = [int(x[len(model):-3]) for x in os.listdir(path+'/'+method+'/'+model+'/critic') if model in x and len(x) > len(model)]
-        it = '%d' % max(saves)
-        path= path+'/'+method+'/'+str(model)+'/critic/'+str(model)+str(it)
-        self.critic = ProximalPolicyOptimization.load_model(path)
+    def load(self, path, name):
+        super().load(path, name)
+        self.critic.load_model(path+'critic/'+name)
         self.critic.compile(optimizer=Adam(lr=self.pi_lr), loss='mse')
         return int(it)
 

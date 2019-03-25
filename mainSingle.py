@@ -1,7 +1,7 @@
 from tensorflow import keras as k
 from agent import agentSelectedUnits, agentSimple, agentAttMap, agentSelectAtt
 from method import policyGradient, trustRegionPolicyOptimization, proximalPolicyOptimization
-from model import simpleDense, multiDense, simpleConv, multiConv, spCMS
+from model import simpleDense, multiDense, simpleConv, multiConv
 
 
 import argparse
@@ -15,8 +15,7 @@ from pysc2.lib import actions, features
 dict_model = 	{'simpleDense': simpleDense.SimpleDense,
 				'multiDense': multiDense.MultiDense,
 				'simpleConv': simpleConv.SimpleConv,
-				'multiConv': multiConv.MultiConv,
-				'spCMS': spCMS.SpCMS}
+				'multiConv': multiConv.MultiConv}
 
 dict_method = { 'pg': policyGradient.PolicyGradient,
 				 'trpo': trustRegionPolicyOptimization.TrustRegionPolicyOptimization,
@@ -59,7 +58,7 @@ def main(_):
 	parser.add_argument('--beta', type=float, default=1e-3, help='beta for advantage calcul only for ppo')
 	parser.add_argument('--coef_neg', type=int,default=1, help='coef mult for negatif reward')
 	parser.add_argument('--coef_pos', type=int,default=1, help='coef mult for positif reward')
-	parser.add_argument('--coef_null', type=int,default=1, help='reward for null value')
+	parser.add_argument('--val_null', type=int,default=0, help='reward for null value')
 	args, unknown_flags = parser.parse_known_args()
 
 	model_name = args.model
@@ -79,7 +78,7 @@ def main(_):
 	beta = args.beta
 	coef_neg = args.coef_neg
 	coef_pos = args.coef_pos
-	coef_null = args.coef_null
+	val_null = args.val_null
 
 	if map_name in dict_map:
 		map = dict_map[map_name]
@@ -114,15 +113,15 @@ def main(_):
 	print("bugger size is : " +str(buffer_size))
 	print("clipping_range is : " +str(clipping_range))
 	print("beta size is : " +str(beta))
-	print("coef_neg size is : " +str(coef_neg))
-	print("coef_pos size is : " +str(coef_pos))
-	print("coef_null size is : " +str(coef_null))
+	print("coef_neg is : " +str(coef_neg))
+	print("coef_pos is : " +str(coef_pos))
+	print("val_null is : " +str(val_null))
 
 	save_replay_episodes = 10 if replay else 0
 
 	ag = agent(path=logger_path+'/'+map, model_name=model_name, model = model, load_model=load_model,
 	 				method_name=method_name, method = method, pi_lr=lr, gamma=gamma, buffer_size=buffer_size,
-					clipping_range=clipping_range, beta=beta, coef_neg=coef_neg, coef_pos=coef_pos, coef_null=coef_null)
+					clipping_range=clipping_range, beta=beta, coef_neg=coef_neg, coef_pos=coef_pos, val_null=val_null)
 
 	try:
 		with sc2_env.SC2Env(map_name=map, players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
@@ -173,7 +172,7 @@ if __name__ == '__main__':
 	parser.add_argument('--beta', type=float, default=1e-3, help='beta for advantage calcul only for ppo')
 	parser.add_argument('--coef_neg', type=int,default=1, help='coef mult for negatif reward')
 	parser.add_argument('--coef_pos', type=int,default=1, help='coef mult for positif reward')
-	parser.add_argument('--coef_null', type=int,default=1, help='reward for null value')
+	parser.add_argument('--val_null', type=int,default=0, help='reward for null value')
 
 	args, unknown_flags = parser.parse_known_args()
 	flags.FLAGS(sys.argv[:1] + unknown_flags)

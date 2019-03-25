@@ -5,7 +5,6 @@ from tensorflow.keras import utils as np_utils
 from tensorflow.keras import losses
 
 from method import baseMethod
-import os
 
 class SpeudoProximalPolicyOptimization(baseMethod.BaseMethod):
     """
@@ -16,7 +15,7 @@ class SpeudoProximalPolicyOptimization(baseMethod.BaseMethod):
         super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta)
 
         self.model = model
-        self.model.make(self.input_dim, self.output_dim)
+        self.model.make(self.input_dim, self.output_dim, "softmax")
         self.__build_train_fn()
 
     def train(self):
