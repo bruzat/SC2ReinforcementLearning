@@ -1,16 +1,17 @@
 import numpy as np
 from tensorflow.keras import backend as K
-from tensorflow.keras import optimizers
-from tensorflow.keras import utils as np_utils
-from tensorflow.keras import losses
-
 from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import utils as np_utils
+from tensorflow.keras.layers import Input
+from tensorflow.keras.models import Model
 
 from method import baseMethod
 
+from absl import app
+
 class ProximalPolicyOptimization(baseMethod.BaseMethod):
     """
-        Implementation of Proximal Policy Optimization
+        Implementation of Policy Gradient
         This Implementation handle only continous values
     """
     def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta ):
@@ -26,7 +27,7 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
 
     def save(self,path, name):
         super().save(path, name)
-        self.critic.save_model(path+'critic/'+name)
+        self.critic.save_model(path)
 
     def load(self, path, name):
         super().load(path, name)
@@ -36,19 +37,22 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
 
     def train(self):
         obs, act, rew, adv = self.buffer.get()
-        loss = []
-        entropy = []
+        action_one_hots = []
+        for i in range(len(self.output_dim)):
+            action_one_hots.append(np_utils.to_categorical(act[i],self.output_dim[i]))
         old_mu = self.get_actions_values(obs)
         pred_values = self.critic_predict(obs)
         adv_new = np.subtract(adv,pred_values)
 
-        for step in range(5):
-            result = self.train_fn([ *obs, *old_mu, *act, adv_new])
-            self.critic.model.fit(obs, [pred_values], verbose=0)
-            loss.append(result[0])
-            entropy.append(result[1])
+        result = self.model_tr.fit([*obs, *old_mu, adv_new],[*action_one_hots], epochs=5, shuffle=True, verbose=0)
+        self.critic.model.fit([*obs], [pred_values], epochs=5, shuffle=True, verbose=0)
 
-        return [np.mean(loss),np.mean(entropy),np.mean(rew)]
+        entropy = 0
+        for key in result.history.keys():
+            if key.endswith('f'):
+                entropy += np.mean(result.history[key])
+
+        return [np.mean(result.history['loss']),entropy,np.mean(rew)]
 
     def critic_predict(self, obs):
         pred = self.critic.predict(obs)
@@ -57,51 +61,35 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
 
     def __build_train_fn(self):
         """Create a train function
-        It replaces `model.fit(X, y)` because we use the output of model and use it for training.
-
         """
-        action_prob_placeholder = self.model.model.outputs
-        advantage_placeholder = K.placeholder(shape=(None,),
-                                                    name="advantage")
 
-        action_placeholder = []
-        old_mu_placeholder = []
-        action_prob_old = []
-        loss = []
-        for i in range(len(self.output_dim)):
-            o_mu_pl = K.placeholder(shape=(None,),
-                                    name="old_mu_placeholder"+str(i))
-            old_mu_placeholder.append(o_mu_pl)
+        old_prediction = []
+        for shape in self.output_dim:
+            old_prediction.append(Input(shape=(shape,)))
 
-            act_pl = K.placeholder(shape=(None,),
-                                   name="action_placeholder"+str(i),
-                                   dtype='int32')
-            action_placeholder.append(act_pl)
+        # Advantages for loss function
+        adv_input = Input(shape=(1,))
 
-            act_prob = K.sum(K.one_hot(act_pl,self.output_dim[i])
-                                        * action_prob_placeholder[i] , axis=1)
+        self.model_tr = Model([*self.model.model.inputs, *old_prediction, adv_input], [*self.model.model.outputs])
 
-            act_prob_old = K.sum(K.one_hot(act_pl,self.output_dim[i])
-                                        * o_mu_pl , axis=1)
+        adam = Adam(lr=self.pi_lr)
 
-            action_prob_old.append(K.mean(-K.log(act_prob_old)))
+        self.model_tr.compile(
+            optimizer=adam,
+            loss=[ self.proximal_policy_optimization_loss(advantage=adv_input,old_prediction=old_prediction[i]) for i in range(len(self.output_dim))],
+            metrics=[ProximalPolicyOptimization.entropy()]
+        )
 
-            r = act_prob/(act_prob_old + 1e-10)
+    def proximal_policy_optimization_loss(self, advantage, old_prediction):
+        def loss(y_true, y_pred):
+            prob = y_true * y_pred
+            old_prob = y_true * old_prediction
+            r = prob/(old_prob + 1e-10)
+            return -K.mean(K.minimum(r * advantage,
+                                    K.clip(r, min_value=1 - self.clipping_range, max_value=1 + self.clipping_range) * advantage) + self.beta * (prob * K.log(prob + 1e-10)))
+        return loss
 
-            l = K.minimum(r * advantage_placeholder, K.clip(r, min_value=1-self.clipping_range, max_value=1+self.clipping_range) * advantage_placeholder)
-            l = l + self.beta * (act_prob * K.log(act_prob + 1e-10))
-            loss.append(-K.mean(l))
-
-        entropy = K.sum(action_prob_old)
-        loss = K.stack(loss)
-        loss_p = K.sum(loss)
-
-        adam = optimizers.Adam(lr = self.pi_lr)
-        updates=adam.get_updates(loss=loss,
-                                        params=self.model.trainable_weights)
-
-        self.train_fn = K.function(inputs=[*self.model.model.inputs,
-                                           *old_mu_placeholder,
-                                           *action_placeholder,
-                                           advantage_placeholder],
-                                    outputs=[loss_p,entropy],updates=updates)
+    def entropy():
+        def f(y_true, y_pred):
+            return K.mean(-K.log(K.sum(y_true * y_pred, axis=1)))
+        return f

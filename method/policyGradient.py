@@ -1,11 +1,15 @@
 import numpy as np
 from tensorflow.keras import backend as K
-from tensorflow.keras import optimizers
+from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import utils as np_utils
+from tensorflow.keras.layers import Input
+from tensorflow.keras.models import Model
+import tensorflow as tf
 
 from method import baseMethod
 
 from absl import app
+
 class PolicyGradient(baseMethod.BaseMethod):
     """
         Implementation of Policy Gradient
@@ -20,55 +24,58 @@ class PolicyGradient(baseMethod.BaseMethod):
 
     def train(self):
         obs, act, rew, adv = self.buffer.get()
-        loss = []
-        entropy = []
-        for step in range(5):
-            result = self.train_fn([*obs, *act, adv])
-            loss.append(result[0])
-            entropy.append(result[1])
+        action_one_hots = []
+        for i in range(len(self.output_dim)):
+            action_one_hots.append(np_utils.to_categorical(act[i],self.output_dim[i]))
 
-        return [np.mean(loss),np.mean(entropy),np.mean(rew)]
+        result = self.model_tr.fit([*obs, adv], [*action_one_hots], epochs=5, shuffle=True, verbose=0)
+
+        entropy = 0
+        for key in result.history.keys():
+            if key.endswith('f'):
+                entropy += np.mean(result.history[key])
+
+        return [np.mean(result.history['loss']),entropy,np.mean(rew)]
+
+    def get_action(self,state):
+        action = self.model.predict([[x]for x in state])
+
+        action_prob = []
+        for i in range(len(self.output_dim)):
+            act = np.squeeze(action[i])
+            action_prob.append(np.random.choice(np.arange(self.output_dim[i]), p=act))
+
+        return action_prob
+
 
     def __build_train_fn(self):
         """Create a train function
-        It replaces `model.fit(X, y)` because we use the output of model and use it for training.
-        For example, we need action placeholder
-        called `action_placeholder` that stores, which action we took at state `s`.
-        Hence, we can update the same action.
-        This function will create
-        `self.train_fn([state, action_one_hot, discount_advantage])`
-        which would train the model.
         """
-        action_prob_placeholder = self.model.model.outputs
-        advantage_placeholder = K.placeholder(shape=(None,),
-                                                    name="advantage")
-        action_placeholder = []
-        action_prob = []
-        loss = []
-        for i in range(len(self.output_dim)):
-            act_pl = K.placeholder(shape=(None,),
-                                   name="action_placeholder"+str(i),
-                                   dtype='int32')
-            action_placeholder.append(act_pl)
 
-            act_prob = K.sum(K.one_hot(act_pl,self.output_dim[i])
-                                        * action_prob_placeholder[i] , axis=1)
-            act_prob = K.log(act_prob)
-            action_prob.append(K.mean(-act_prob))
+        # Advantages for loss function
+        adv_input = Input(shape=(1,))
 
-            l = -K.mean(act_prob * advantage_placeholder)
-            loss.append(l)
+        self.model_tr = Model([*self.model.model.inputs, adv_input], [*self.model.model.outputs])
 
-        entropy = K.sum(action_prob)
-        loss = K.stack(loss)
-        loss_p = K.sum(loss)
+        adam = Adam(lr=self.pi_lr)
 
+        self.model_tr.compile(
+            optimizer=adam,
+            loss=self.pg_loss(advantage=adv_input),
+            metrics=[self.entropy()]
+        )
 
-        adam = optimizers.Adam(lr = self.pi_lr)
-        updates=adam.get_updates(loss=loss,
-                                        params=self.model.trainable_weights)
+    def pg_loss(self,advantage):
+        def f(y_true, y_pred):
+            """
+            Policy gradient loss
+            """
+            responsible_outputs = K.sum(y_true * y_pred, axis=1)
+            policy_loss = -K.mean(responsible_outputs*advantage)
+            return policy_loss
+        return f
 
-        self.train_fn = K.function(inputs=[*self.model.model.inputs,
-                                           *action_placeholder,
-                                           advantage_placeholder],
-                                    outputs=[loss_p,entropy],updates=updates)
+    def entropy(self):
+        def f(y_true, y_pred):
+            return K.mean(-K.log(K.sum(y_true * y_pred, axis=1)))
+        return f

@@ -12,11 +12,13 @@ class TrustRegionPolicyOptimization(baseMethod.BaseMethod):
         This Implementation handle only continous values
     """
     def __init__(self, model, input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta ):
+        raise Exception('Don\'t work')
         super().__init__(input_dim, output_dim, pi_lr, gamma, buffer_size, clipping_range, beta)
 
         self.model = model
         self.model.make(self.input_dim, self.output_dim, "softmax")
         self.__build_train_fn()
+
 
     def train(self):
         obs, act, rew, adv = self.buffer.get()

@@ -1,4 +1,4 @@
-from method import trustRegionPolicyOptimization, policyGradientTest, policyGradient, proximalPolicyOptimization
+from method import trustRegionPolicyOptimization, policyGradient, proximalPolicyOptimization
 from model import simpleDense
 from absl import app
 
@@ -69,7 +69,6 @@ class GridWorld(object):
         for i in range(self.dim):
             y = 0
             print('.'*10)
-            print(self.position[i])
             for line in self.rewards[i]:
                 x = 0
                 for case in line:
@@ -88,14 +87,14 @@ class GridWorld(object):
 
 
 def main(_):
-    grid = GridWorld(dim = 1)
+    grid = GridWorld(dim = 2)
     buffer_size = 1000
 
     # Create the NET class
-    agent = policyGradientTest.PolicyGradient(
-    	input_dim=[(7, 7)],
-    	output_dim=[4],
-    	pi_lr=0.001,
+    agent = proximalPolicyOptimization.ProximalPolicyOptimization(
+    	input_dim=[(7, 7),(7, 7)],
+    	output_dim=[4,4],
+    	pi_lr=0.0001,
     	buffer_size=buffer_size,
         gamma=0.99,
         clipping_range=0.2,
@@ -123,7 +122,6 @@ def main(_):
             if done:
                 agent.finish_path(reward)
                 if len(rewards) > 100000:
-                    print("pop")
                     for i in range(1000):
                         rewards.pop(0)
                 rewards.append(reward)
