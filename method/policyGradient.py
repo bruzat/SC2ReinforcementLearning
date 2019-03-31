@@ -28,7 +28,7 @@ class PolicyGradient(baseMethod.BaseMethod):
         for i in range(len(self.output_dim)):
             action_one_hots.append(np_utils.to_categorical(act[i],self.output_dim[i]))
 
-        result = self.model_tr.fit([*obs, adv], [*action_one_hots], epochs=5, shuffle=True, verbose=0)
+        result = self.model_tr.fit([*obs, adv], [*action_one_hots], epochs=2, shuffle=True, verbose=0)
 
         entropy = 0
         for key in result.history.keys():

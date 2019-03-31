@@ -44,8 +44,8 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
         pred_values = self.critic_predict(obs)
         adv_new = np.subtract(adv,pred_values)
 
-        result = self.model_tr.fit([*obs, *old_mu, adv_new],[*action_one_hots], epochs=5, shuffle=True, verbose=0)
-        self.critic.model.fit([*obs], [pred_values], epochs=5, shuffle=True, verbose=0)
+        result = self.model_tr.fit([*obs, *old_mu, adv_new],[*action_one_hots], epochs=2, shuffle=True, verbose=0)
+        self.critic.model.fit([*obs], [pred_values], epochs=2, shuffle=True, verbose=0)
 
         entropy = 0
         for key in result.history.keys():
