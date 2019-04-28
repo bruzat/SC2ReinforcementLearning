@@ -10,13 +10,17 @@ class AgentSimple(baseAgent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-3):
-		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, val_null=val_null, coef_neg=coef_neg, coef_pos=coef_pos, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
+	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False,
+ 					val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001,gamma=0.98, buffer_size=1024, clipping_range=0.2,
+					beta=1e-3, map_size = 80, minimap_size = 64):
+		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model,
+		 					val_null=val_null, coef_neg=coef_neg, coef_pos=coef_pos, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size,
+							clipping_range=clipping_range, beta=beta, map_size = map_size, minimap_size = minimap_size)
         # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=[(64,64)],
-        	output_dim=[64*64],
+        	input_dim=[(self.map_size,self.map_size)],
+        	output_dim=[self.map_size*self.map_size],
         	pi_lr=pi_lr,
         	gamma=gamma,
         	buffer_size=buffer_size,
@@ -91,7 +95,7 @@ class AgentSimple(baseAgent.BaseAgent):
 
 		if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
 			# Convert the prediction into positions
-			positions = AgentSimple.prediction_to_position([act])
+			positions = AgentSimple.prediction_to_position([act],  dim = self.map_size)
 			# Get a random location on the map
 			return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], positions[0]]), act
 
@@ -106,7 +110,7 @@ class AgentSimple(baseAgent.BaseAgent):
 		return np.array(mapp)
 
 	@staticmethod
-	def prediction_to_position(pi, dim = 64):
+	def prediction_to_position(pi, dim):
 		# Translate the prediction to y,x position
 		pirescale = np.expand_dims(pi, axis=1)
 		pirescale = np.append(pirescale, np.zeros_like(pirescale), axis=1)

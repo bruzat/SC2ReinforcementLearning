@@ -8,7 +8,9 @@ class BaseAgent(base_agent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-3):
+	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None,
+	 			load_model=False, val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98,
+				buffer_size=1024, clipping_range=0.2, beta=1e-3, map_size = 80, minimap_size = 64):
 		super().__init__()
 		self.logger = log.Logger()
 		self.model_name = model_name
@@ -27,6 +29,8 @@ class BaseAgent(base_agent.BaseAgent):
 		self.coef_neg = coef_neg
 		self.coef_pos = coef_pos
 		self.val_null = val_null
+		self.map_size = map_size
+		self.minimap_size = minimap_size
 
 	@abstractmethod
 	def train(self, obs_new, obs, action, reward):

@@ -10,13 +10,16 @@ class AgentSelectAtt(baseAgent.BaseAgent):
 		An agent for doing a simple movement form one point to another.
 	"""
 
-	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False, val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001, gamma=0.98, buffer_size=1024, clipping_range=0.2, beta=1e-3):
-		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model, val_null=val_null, coef_neg=coef_neg, coef_pos=coef_pos, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size, clipping_range=clipping_range, beta=beta)
-        # Create the NET class
+	def __init__(self, model, path='logger/', model_name='model', method_name="method", method=None, load_model=False,
+ 					val_null=0, coef_neg=1, coef_pos=1, pi_lr=0.001,gamma=0.98, buffer_size=1024, clipping_range=0.2,
+					beta=1e-3, map_size = 80, minimap_size = 64):
+		super().__init__(model, path=path, model_name=model_name, method_name=method_name, method=method, load_model=load_model,
+		 					val_null=val_null, coef_neg=coef_neg, coef_pos=coef_pos, pi_lr=pi_lr, gamma=gamma, buffer_size=buffer_size,
+							clipping_range=clipping_range, beta=beta, map_size = map_size, minimap_size = minimap_size)        # Create the NET class
 		self.method = method(
 			model = model,
-        	input_dim=[(5,64,64),(9,7)],
-        	output_dim=[3,64*64,64*64],
+        	input_dim=[(5,self.map_size,self.map_size),(9,7)],
+        	output_dim=[3,self.map_size*self.map_size,self.map_size*self.map_size],
         	pi_lr=pi_lr,
         	gamma=gamma,
         	buffer_size=buffer_size,
@@ -91,22 +94,22 @@ class AgentSelectAtt(baseAgent.BaseAgent):
 		if act[0] == 0:
 			if actions.FUNCTIONS.Move_screen.id in obs.observation['available_actions']:
 				# Convert the prediction into positions
-				position = AgentSelectAtt.prediction_to_position([act[1]])
+				position = AgentSelectAtt.prediction_to_position([act[1]], dim = self.map_size)
 				# Get a random location on the map
 				return actions.FunctionCall(actions.FUNCTIONS.Move_screen.id, [[0], position[0]]) , act
 			else:
-				return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[]), act
+				return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[],), act
 		elif act[0] == 1:
 			if actions.FUNCTIONS.Attack_screen.id in obs.observation['available_actions']:
 				# Convert the prediction into positions
-				position = AgentSelectAtt.prediction_to_position([act[1]])
+				position = AgentSelectAtt.prediction_to_position([act[1]],  dim = self.map_size)
 				# Get a random location on the map
 				return actions.FunctionCall(actions.FUNCTIONS.Attack_screen.id, [[0], position[0]]) , act
 			else:
 				return actions.FunctionCall(actions.FUNCTIONS.no_op.id,[]), act
 		elif act[0] == 2:
-			position1 = AgentSelectAtt.prediction_to_position([act[1]])
-			position2 = AgentSelectAtt.prediction_to_position([act[2]])
+			position1 = AgentSelectAtt.prediction_to_position([act[1]],  dim = self.map_size)
+			position2 = AgentSelectAtt.prediction_to_position([act[2]],  dim = self.map_size)
 			return actions.FunctionCall(actions.FUNCTIONS.select_rect.id, [[0], position1[0], position2[0]]) , act
 
 
@@ -130,7 +133,7 @@ class AgentSelectAtt(baseAgent.BaseAgent):
 		return [np.array(mapp),multi_select]
 
 	@staticmethod
-	def prediction_to_position(pi, dim = 64):
+	def prediction_to_position(pi, dim):
 		# Translate the prediction to y,x position
 		pirescale = np.expand_dims(pi, axis=1)
 		pirescale = np.append(pirescale, np.zeros_like(pirescale), axis=1)

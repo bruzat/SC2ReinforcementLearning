@@ -27,7 +27,7 @@ class ProximalPolicyOptimization(baseMethod.BaseMethod):
 
     def save(self,path, name):
         super().save(path, name)
-        self.critic.save_model(path)
+        self.critic.save_model(path+'critic/'+name)
 
     def load(self, path, name):
         super().load(path, name)
