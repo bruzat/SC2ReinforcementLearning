@@ -134,7 +134,7 @@ def main(_):
 
 	try:
 		with sc2_env.SC2Env(map_name=map, players=[sc2_env.Agent(sc2_env.Race.zerg)], agent_interface_format=features.AgentInterfaceFormat(
-			feature_dimensions=features.Dimensions(screen=64, minimap=64),
+			feature_dimensions=features.Dimensions(screen=map_size, minimap=minimap_size),
 			use_feature_units=True),
 			step_mul=step_mul, # Number of step before to ask the next action to from the agent
 			visualize=visualize,
